@@ -53,24 +53,26 @@ export default function TaskBoard() {
     update([task, ...tasks])
   }
 
+  function handleRenameTask(taskId: string, title: string) {
+    update(tasks.map((t) => t._id === taskId ? { ...t, title } : t))
+  }
+
   function handleToggleSubtask(taskId: string, subtaskId: string) {
-    update(
-      tasks.map((t) =>
-        t._id !== taskId
-          ? t
-          : { ...t, subtasks: t.subtasks.map((s) => s._id === subtaskId ? { ...s, done: !s.done } : s) }
-      )
-    )
+    update(tasks.map((t) =>
+      t._id !== taskId ? t : {
+        ...t,
+        subtasks: t.subtasks.map((s) => s._id === subtaskId ? { ...s, done: !s.done } : s),
+      }
+    ))
   }
 
   function handleAddSubtask(taskId: string, title: string) {
-    update(
-      tasks.map((t) =>
-        t._id !== taskId
-          ? t
-          : { ...t, subtasks: [...t.subtasks, { _id: newId(), title, done: false }] }
-      )
-    )
+    update(tasks.map((t) =>
+      t._id !== taskId ? t : {
+        ...t,
+        subtasks: [...t.subtasks, { _id: newId(), title, done: false }],
+      }
+    ))
   }
 
   function handleArchive(taskId: string) {
@@ -91,58 +93,75 @@ export default function TaskBoard() {
   const completedTasks = active.filter(
     (t) => t.subtasks.length > 0 && t.subtasks.every((s) => s.done)
   ).length
-  const overallProgress =
-    active.length === 0 ? 0 : Math.round((completedTasks / active.length) * 100)
+  const overallProgress = active.length === 0 ? 0 : Math.round((completedTasks / active.length) * 100)
 
   if (!mounted) return null
 
   return (
     <>
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Task Manager</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {completedTasks}/{active.length} tasks complete
-          </p>
-          {active.length > 0 && (
-            <div className="mt-2 flex items-center gap-3">
-              <div className="h-2 w-40 overflow-hidden rounded-full bg-gray-200">
+      {/* Page header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Tasks</h1>
+            <p className="mt-1 text-sm text-gray-400">
+              {active.length === 0
+                ? 'No active tasks'
+                : `${completedTasks} of ${active.length} tasks complete`}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New Task
+          </button>
+        </div>
+
+        {/* Overall progress */}
+        {active.length > 0 && (
+          <div className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+            <div className="flex-1">
+              <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+                <span>Overall progress</span>
+                <span className="font-semibold text-indigo-600">{overallProgress}%</span>
+              </div>
+              <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-blue-500 transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
                   style={{ width: `${overallProgress}%` }}
                 />
               </div>
-              <span className="text-xs font-medium text-blue-600">{overallProgress}%</span>
             </div>
-          )}
-        </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow hover:bg-blue-700 active:scale-95 transition-transform"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          New Task
-        </button>
+            <div className="shrink-0 text-right">
+              <p className="text-2xl font-bold text-gray-800">{completedTasks}<span className="text-sm font-normal text-gray-400">/{active.length}</span></p>
+              <p className="text-xs text-gray-400">done</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Task list */}
       {active.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 py-20 text-center">
-          <svg className="mb-3 h-10 w-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-          </svg>
-          <p className="text-sm font-medium text-gray-400">No tasks yet</p>
-          <p className="mt-1 text-xs text-gray-300">Click &ldquo;New Task&rdquo; to get started</p>
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 py-24 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+            <svg className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <p className="text-sm font-semibold text-gray-400">No tasks yet</p>
+          <p className="mt-1 text-xs text-gray-300">Hit &ldquo;New Task&rdquo; to get started</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {active.map((task) => (
             <TaskCard
               key={task._id}
               task={task}
+              onRenameTask={handleRenameTask}
               onToggleSubtask={handleToggleSubtask}
               onAddSubtask={handleAddSubtask}
               onArchive={handleArchive}
@@ -151,17 +170,10 @@ export default function TaskBoard() {
         </div>
       )}
 
-      <ArchivedSection
-        tasks={archived}
-        onUnarchive={handleUnarchive}
-        onDelete={handleDelete}
-      />
+      <ArchivedSection tasks={archived} onUnarchive={handleUnarchive} onDelete={handleDelete} />
 
       {showModal && (
-        <AddTaskModal
-          onClose={() => setShowModal(false)}
-          onCreate={handleCreate}
-        />
+        <AddTaskModal onClose={() => setShowModal(false)} onCreate={handleCreate} />
       )}
     </>
   )

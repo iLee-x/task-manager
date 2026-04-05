@@ -16,61 +16,80 @@ export default function AddTaskModal({ onClose, onCreate }: Props) {
     const data = new FormData(e.currentTarget)
     const title = (data.get('title') as string).trim()
     if (!title) { setError('Title is required'); return }
-
     const description = (data.get('description') as string).trim()
-    const subtasks = (data.get('subtasks') as string)
-      .split('\n').map((s) => s.trim()).filter(Boolean)
-
+    const subtasks = (data.get('subtasks') as string).split('\n').map((s) => s.trim()).filter(Boolean)
     onCreate(title, description, subtasks)
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-        <h2 className="mb-4 text-xl font-bold text-gray-800">New Task</h2>
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
+        {/* Modal header */}
+        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold text-white">New Task</h2>
+            <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Form */}
+        <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Title <span className="text-red-500">*</span>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Title <span className="text-red-400">*</span>
             </label>
             <input
               name="title"
               type="text"
-              placeholder="Task title"
+              autoFocus
+              placeholder="What needs to be done?"
               onChange={() => setError('')}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-colors"
             />
-            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+            {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Description</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Description
+            </label>
             <textarea
               name="description"
               rows={2}
-              placeholder="Optional description"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              placeholder="Optional notes..."
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-colors resize-none"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">
-              Subtasks <span className="text-gray-400 text-xs">(one per line)</span>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Subtasks <span className="normal-case font-normal text-gray-300">(one per line)</span>
             </label>
             <textarea
               name="subtasks"
               rows={4}
-              placeholder={"Design mockup\nWrite backend API\nDeploy"}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              placeholder={"Design mockup\nWrite the API\nDeploy to production"}
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-colors resize-none font-mono"
             />
           </div>
 
           <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+            >
               Cancel
             </button>
-            <button type="submit" className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700">
+            <button
+              type="submit"
+              className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity shadow-md shadow-indigo-200"
+            >
               Create Task
             </button>
           </div>

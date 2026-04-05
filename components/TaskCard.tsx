@@ -1,23 +1,38 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { Task } from '@/types'
 
 interface Props {
   task: Task
+  onRenameTask: (taskId: string, title: string) => void
   onToggleSubtask: (taskId: string, subtaskId: string) => void
   onAddSubtask: (taskId: string, title: string) => void
   onArchive: (taskId: string) => void
 }
 
-export default function TaskCard({ task, onToggleSubtask, onAddSubtask, onArchive }: Props) {
+export default function TaskCard({ task, onRenameTask, onToggleSubtask, onAddSubtask, onArchive }: Props) {
   const [newSubtask, setNewSubtask] = useState('')
   const [showInput, setShowInput] = useState(false)
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState(task.title)
+  const titleInputRef = useRef<HTMLInputElement>(null)
 
   const total = task.subtasks.length
   const done = task.subtasks.filter((s) => s.done).length
   const progress = total === 0 ? 0 : Math.round((done / total) * 100)
   const isComplete = total > 0 && done === total
+
+  useEffect(() => {
+    if (editingTitle) titleInputRef.current?.select()
+  }, [editingTitle])
+
+  function commitTitle() {
+    const trimmed = titleDraft.trim()
+    if (trimmed && trimmed !== task.title) onRenameTask(task._id, trimmed)
+    else setTitleDraft(task.title)
+    setEditingTitle(false)
+  }
 
   function handleAddSubtask() {
     const title = newSubtask.trim()
@@ -27,37 +42,76 @@ export default function TaskCard({ task, onToggleSubtask, onAddSubtask, onArchiv
     setShowInput(false)
   }
 
+  const progressColor = isComplete
+    ? 'from-emerald-400 to-green-500'
+    : progress > 50
+    ? 'from-indigo-400 to-violet-500'
+    : 'from-indigo-400 to-blue-500'
+
   return (
-    <div className="rounded-2xl border bg-white p-5 shadow-sm">
+    <div className={`group rounded-2xl border bg-white p-5 shadow-sm transition-all hover:shadow-md ${isComplete ? 'border-emerald-100' : 'border-gray-100'}`}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h3 className="truncate text-base font-semibold text-gray-900">{task.title}</h3>
+          {editingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onBlur={commitTitle}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') commitTitle()
+                if (e.key === 'Escape') { setTitleDraft(task.title); setEditingTitle(false) }
+              }}
+              className="w-full rounded-lg border border-indigo-300 bg-indigo-50 px-2 py-0.5 text-base font-semibold text-gray-900 outline-none ring-2 ring-indigo-200"
+            />
+          ) : (
+            <div className="flex items-center gap-1.5 group/title">
+              <h3
+                className="truncate text-base font-semibold text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors"
+                onClick={() => setEditingTitle(true)}
+                title="Click to edit"
+              >
+                {task.title}
+              </h3>
+              <button
+                onClick={() => setEditingTitle(true)}
+                className="opacity-0 group-hover/title:opacity-100 transition-opacity text-gray-300 hover:text-indigo-400"
+                title="Edit title"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+            </div>
+          )}
           {task.description && (
-            <p className="mt-0.5 text-sm text-gray-500 line-clamp-2">{task.description}</p>
+            <p className="mt-0.5 text-sm text-gray-400 line-clamp-2">{task.description}</p>
           )}
         </div>
+
         {isComplete && (
           <button
             onClick={() => onArchive(task._id)}
-            className="shrink-0 rounded-lg bg-green-100 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-200"
+            className="shrink-0 flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors border border-emerald-100"
           >
-            Archive
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Done — Archive
           </button>
         )}
       </div>
 
-      {/* Progress bar */}
+      {/* Progress */}
       <div className="mt-4">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>{done}/{total} subtasks</span>
-          <span className={`font-medium ${isComplete ? 'text-green-600' : 'text-blue-600'}`}>
-            {progress}%
-          </span>
+        <div className="flex justify-between text-xs mb-1.5">
+          <span className="text-gray-400">{done}/{total} subtasks</span>
+          <span className={`font-semibold ${isComplete ? 'text-emerald-500' : 'text-indigo-500'}`}>{progress}%</span>
         </div>
-        <div className="h-2 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-green-500' : 'bg-blue-500'}`}
+            className={`h-full rounded-full bg-gradient-to-r ${progressColor} transition-all duration-500`}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -65,24 +119,25 @@ export default function TaskCard({ task, onToggleSubtask, onAddSubtask, onArchiv
 
       {/* Subtasks */}
       {task.subtasks.length > 0 && (
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-4 space-y-1.5">
           {task.subtasks.map((subtask) => (
-            <li key={subtask._id} className="flex items-center gap-3">
-              <button
-                onClick={() => onToggleSubtask(task._id, subtask._id)}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  subtask.done
-                    ? 'border-green-500 bg-green-500 text-white'
-                    : 'border-gray-300 hover:border-blue-400'
-                }`}
-              >
+            <li
+              key={subtask._id}
+              onClick={() => onToggleSubtask(task._id, subtask._id)}
+              className="flex items-center gap-3 rounded-xl px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+              <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                subtask.done
+                  ? 'border-emerald-500 bg-emerald-500 text-white'
+                  : 'border-gray-200 hover:border-indigo-400'
+              }`}>
                 {subtask.done && (
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 )}
-              </button>
-              <span className={`text-sm ${subtask.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+              </div>
+              <span className={`text-sm select-none ${subtask.done ? 'text-gray-300 line-through' : 'text-gray-600'}`}>
                 {subtask.title}
               </span>
             </li>
@@ -91,9 +146,9 @@ export default function TaskCard({ task, onToggleSubtask, onAddSubtask, onArchiv
       )}
 
       {/* Add subtask */}
-      <div className="mt-4">
+      <div className="mt-3">
         {showInput ? (
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-2">
             <input
               autoFocus
               value={newSubtask}
@@ -102,19 +157,22 @@ export default function TaskCard({ task, onToggleSubtask, onAddSubtask, onArchiv
                 if (e.key === 'Enter') handleAddSubtask()
                 if (e.key === 'Escape') { setShowInput(false); setNewSubtask('') }
               }}
-              placeholder="Subtask title..."
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              placeholder="New subtask..."
+              className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white"
             />
-            <button onClick={handleAddSubtask} className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
+            <button onClick={handleAddSubtask} className="rounded-xl bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
               Add
             </button>
-            <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50">
-              Cancel
+            <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50">
+              ✕
             </button>
           </div>
         ) : (
-          <button onClick={() => setShowInput(true)} className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-700">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <button
+            onClick={() => setShowInput(true)}
+            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 transition-colors"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
             Add subtask
