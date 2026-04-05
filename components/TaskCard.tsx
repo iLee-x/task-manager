@@ -6,16 +6,19 @@ import type { Task } from '@/types'
 interface Props {
   task: Task
   onRenameTask: (taskId: string, title: string) => void
+  onRenameSubtask: (taskId: string, subtaskId: string, title: string) => void
   onToggleSubtask: (taskId: string, subtaskId: string) => void
   onAddSubtask: (taskId: string, title: string) => void
   onArchive: (taskId: string) => void
 }
 
-export default function TaskCard({ task, onRenameTask, onToggleSubtask, onAddSubtask, onArchive }: Props) {
+export default function TaskCard({ task, onRenameTask, onRenameSubtask, onToggleSubtask, onAddSubtask, onArchive }: Props) {
   const [newSubtask, setNewSubtask] = useState('')
   const [showInput, setShowInput] = useState(false)
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(task.title)
+  const [editingSubtask, setEditingSubtask] = useState<string | null>(null)
+  const [subtaskDraft, setSubtaskDraft] = useState('')
   const titleInputRef = useRef<HTMLInputElement>(null)
 
   const total = task.subtasks.length
@@ -32,6 +35,18 @@ export default function TaskCard({ task, onRenameTask, onToggleSubtask, onAddSub
     if (trimmed && trimmed !== task.title) onRenameTask(task._id, trimmed)
     else setTitleDraft(task.title)
     setEditingTitle(false)
+  }
+
+  function startEditSubtask(subtaskId: string, currentTitle: string) {
+    setEditingSubtask(subtaskId)
+    setSubtaskDraft(currentTitle)
+  }
+
+  function commitSubtask(subtaskId: string) {
+    const trimmed = subtaskDraft.trim()
+    const original = task.subtasks.find((s) => s._id === subtaskId)?.title ?? ''
+    if (trimmed && trimmed !== original) onRenameSubtask(task._id, subtaskId, trimmed)
+    setEditingSubtask(null)
   }
 
   function handleAddSubtask() {
@@ -77,7 +92,6 @@ export default function TaskCard({ task, onRenameTask, onToggleSubtask, onAddSub
               <button
                 onClick={() => setEditingTitle(true)}
                 className="opacity-0 group-hover/title:opacity-100 transition-opacity text-gray-300 hover:text-indigo-400"
-                title="Edit title"
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -119,27 +133,51 @@ export default function TaskCard({ task, onRenameTask, onToggleSubtask, onAddSub
 
       {/* Subtasks */}
       {task.subtasks.length > 0 && (
-        <ul className="mt-4 space-y-1.5">
+        <ul className="mt-4 space-y-1">
           {task.subtasks.map((subtask) => (
             <li
               key={subtask._id}
-              onClick={() => onToggleSubtask(task._id, subtask._id)}
-              className="flex items-center gap-3 rounded-xl px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-gray-50 transition-colors"
             >
-              <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                subtask.done
-                  ? 'border-emerald-500 bg-emerald-500 text-white'
-                  : 'border-gray-200 hover:border-indigo-400'
-              }`}>
+              <button
+                onClick={() => onToggleSubtask(task._id, subtask._id)}
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
+                  subtask.done
+                    ? 'border-emerald-500 bg-emerald-500 text-white'
+                    : 'border-gray-200 hover:border-indigo-400'
+                }`}
+              >
                 {subtask.done && (
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 )}
-              </div>
-              <span className={`text-sm select-none ${subtask.done ? 'text-gray-300 line-through' : 'text-gray-600'}`}>
-                {subtask.title}
-              </span>
+              </button>
+
+              {editingSubtask === subtask._id ? (
+                <input
+                  autoFocus
+                  value={subtaskDraft}
+                  onChange={(e) => setSubtaskDraft(e.target.value)}
+                  onBlur={() => commitSubtask(subtask._id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitSubtask(subtask._id)
+                    if (e.key === 'Escape') setEditingSubtask(null)
+                  }}
+                  className="flex-1 min-w-0 rounded-lg border border-indigo-300 bg-indigo-50 px-2 py-0.5 text-sm outline-none ring-1 ring-indigo-100"
+                />
+              ) : (
+                <span
+                  onClick={() => !subtask.done && startEditSubtask(subtask._id, subtask.title)}
+                  className={`flex-1 text-sm select-none transition-colors ${
+                    subtask.done
+                      ? 'text-gray-300 line-through'
+                      : 'text-gray-600 cursor-pointer hover:text-indigo-600'
+                  }`}
+                >
+                  {subtask.title}
+                </span>
+              )}
             </li>
           ))}
         </ul>
@@ -148,7 +186,7 @@ export default function TaskCard({ task, onRenameTask, onToggleSubtask, onAddSub
       {/* Add subtask */}
       <div className="mt-3">
         {showInput ? (
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2">
             <input
               autoFocus
               value={newSubtask}
@@ -160,12 +198,8 @@ export default function TaskCard({ task, onRenameTask, onToggleSubtask, onAddSub
               placeholder="New subtask..."
               className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white"
             />
-            <button onClick={handleAddSubtask} className="rounded-xl bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">
-              Add
-            </button>
-            <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50">
-              ✕
-            </button>
+            <button onClick={handleAddSubtask} className="rounded-xl bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">Add</button>
+            <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50">✕</button>
           </div>
         ) : (
           <button
