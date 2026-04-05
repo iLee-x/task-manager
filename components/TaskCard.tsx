@@ -1,44 +1,34 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { toggleSubtask, addSubtask, archiveTask } from '@/app/actions'
+import { useState } from 'react'
 import type { Task } from '@/types'
 
 interface Props {
   task: Task
+  onToggleSubtask: (taskId: string, subtaskId: string) => void
+  onAddSubtask: (taskId: string, title: string) => void
+  onArchive: (taskId: string) => void
 }
 
-export default function TaskCard({ task }: Props) {
-  const [isPending, startTransition] = useTransition()
+export default function TaskCard({ task, onToggleSubtask, onAddSubtask, onArchive }: Props) {
   const [newSubtask, setNewSubtask] = useState('')
   const [showInput, setShowInput] = useState(false)
 
   const total = task.subtasks.length
   const done = task.subtasks.filter((s) => s.done).length
   const progress = total === 0 ? 0 : Math.round((done / total) * 100)
-
   const isComplete = total > 0 && done === total
-
-  function handleToggle(subtaskId: string, currentDone: boolean) {
-    startTransition(() => toggleSubtask(task._id, subtaskId, !currentDone))
-  }
 
   function handleAddSubtask() {
     const title = newSubtask.trim()
     if (!title) return
-    startTransition(async () => {
-      await addSubtask(task._id, title)
-      setNewSubtask('')
-      setShowInput(false)
-    })
-  }
-
-  function handleArchive() {
-    startTransition(() => archiveTask(task._id))
+    onAddSubtask(task._id, title)
+    setNewSubtask('')
+    setShowInput(false)
   }
 
   return (
-    <div className={`rounded-2xl border bg-white p-5 shadow-sm transition-opacity ${isPending ? 'opacity-60' : ''}`}>
+    <div className="rounded-2xl border bg-white p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
@@ -49,8 +39,7 @@ export default function TaskCard({ task }: Props) {
         </div>
         {isComplete && (
           <button
-            onClick={handleArchive}
-            title="Archive task"
+            onClick={() => onArchive(task._id)}
             className="shrink-0 rounded-lg bg-green-100 px-3 py-1 text-xs font-medium text-green-700 hover:bg-green-200"
           >
             Archive
@@ -80,7 +69,7 @@ export default function TaskCard({ task }: Props) {
           {task.subtasks.map((subtask) => (
             <li key={subtask._id} className="flex items-center gap-3">
               <button
-                onClick={() => handleToggle(subtask._id, subtask.done)}
+                onClick={() => onToggleSubtask(task._id, subtask._id)}
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
                   subtask.done
                     ? 'border-green-500 bg-green-500 text-white'
@@ -116,24 +105,15 @@ export default function TaskCard({ task }: Props) {
               placeholder="Subtask title..."
               className="flex-1 rounded-lg border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
-            <button
-              onClick={handleAddSubtask}
-              className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700"
-            >
+            <button onClick={handleAddSubtask} className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
               Add
             </button>
-            <button
-              onClick={() => { setShowInput(false); setNewSubtask('') }}
-              className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
-            >
+            <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50">
               Cancel
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setShowInput(true)}
-            className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-700"
-          >
+          <button onClick={() => setShowInput(true)} className="flex items-center gap-1 text-sm text-blue-500 hover:text-blue-700">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>

@@ -1,28 +1,28 @@
 'use client'
 
-import { useRef, useState, useTransition } from 'react'
-import { createTask } from '@/app/actions'
+import { useRef, useState } from 'react'
 
 interface Props {
   onClose: () => void
+  onCreate: (title: string, description: string, subtasks: string[]) => void
 }
 
-export default function AddTaskModal({ onClose }: Props) {
+export default function AddTaskModal({ onClose, onCreate }: Props) {
   const formRef = useRef<HTMLFormElement>(null)
-  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    const title = (formData.get('title') as string).trim()
+    const data = new FormData(e.currentTarget)
+    const title = (data.get('title') as string).trim()
     if (!title) { setError('Title is required'); return }
 
-    startTransition(async () => {
-      await createTask(formData)
-      formRef.current?.reset()
-      onClose()
-    })
+    const description = (data.get('description') as string).trim()
+    const subtasks = (data.get('subtasks') as string)
+      .split('\n').map((s) => s.trim()).filter(Boolean)
+
+    onCreate(title, description, subtasks)
+    onClose()
   }
 
   return (
@@ -67,19 +67,11 @@ export default function AddTaskModal({ onClose }: Props) {
           </div>
 
           <div className="flex gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
+            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-60"
-            >
-              {isPending ? 'Creating...' : 'Create Task'}
+            <button type="submit" className="flex-1 rounded-lg bg-blue-600 py-2 text-sm font-medium text-white hover:bg-blue-700">
+              Create Task
             </button>
           </div>
         </form>
