@@ -10,9 +10,10 @@ interface Props {
   onToggleSubtask: (taskId: string, subtaskId: string) => void
   onAddSubtask: (taskId: string, title: string) => void
   onArchive: (taskId: string) => void
+  onDelete: (taskId: string) => void
 }
 
-export default function TaskCard({ task, onRenameTask, onRenameSubtask, onToggleSubtask, onAddSubtask, onArchive }: Props) {
+export default function TaskCard({ task, onRenameTask, onRenameSubtask, onToggleSubtask, onAddSubtask, onArchive, onDelete }: Props) {
   const [newSubtask, setNewSubtask] = useState('')
   const [showInput, setShowInput] = useState(false)
   const [editingTitle, setEditingTitle] = useState(false)
@@ -104,17 +105,28 @@ export default function TaskCard({ task, onRenameTask, onRenameSubtask, onToggle
           )}
         </div>
 
-        {isComplete && (
+        <div className="flex shrink-0 items-center gap-1.5">
+          {isComplete && (
+            <button
+              onClick={() => onArchive(task._id)}
+              className="flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors border border-emerald-100"
+            >
+              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Archive
+            </button>
+          )}
           <button
-            onClick={() => onArchive(task._id)}
-            className="shrink-0 flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors border border-emerald-100"
+            onClick={() => { if (confirm('Delete this task?')) onDelete(task._id) }}
+            className="rounded-lg border border-gray-200 p-1 text-gray-300 hover:border-red-200 hover:text-red-400 transition-colors"
+            title="Delete task"
           >
-            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
             </svg>
-            Done — Archive
           </button>
-        )}
+        </div>
       </div>
 
       {/* Progress */}

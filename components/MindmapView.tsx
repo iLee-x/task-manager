@@ -9,6 +9,7 @@ interface Handlers {
   onToggleSubtask: (taskId: string, subtaskId: string) => void
   onAddSubtask: (taskId: string, title: string) => void
   onArchive: (taskId: string) => void
+  onDelete: (taskId: string) => void
 }
 
 interface ViewProps extends Handlers {
@@ -17,7 +18,7 @@ interface ViewProps extends Handlers {
 
 // ─── Single task tree ────────────────────────────────────────────────────────
 
-function MindmapNode({ task, onRenameTask, onRenameSubtask, onToggleSubtask, onAddSubtask, onArchive }: Handlers & { task: Task }) {
+function MindmapNode({ task, onRenameTask, onRenameSubtask, onToggleSubtask, onAddSubtask, onArchive, onDelete }: Handlers & { task: Task }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const taskNodeRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -164,14 +165,25 @@ function MindmapNode({ task, onRenameTask, onRenameSubtask, onToggleSubtask, onA
           </div>
         )}
 
-        {isComplete && (
+        <div className="mt-2.5 flex gap-1.5">
+          {isComplete && (
+            <button
+              onClick={() => onArchive(task._id)}
+              className="flex-1 rounded-lg bg-emerald-100 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-200 transition-colors"
+            >
+              Archive
+            </button>
+          )}
           <button
-            onClick={() => onArchive(task._id)}
-            className="mt-2.5 w-full rounded-lg bg-emerald-100 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-200 transition-colors"
+            onClick={() => { if (confirm('Delete this task?')) onDelete(task._id) }}
+            className="rounded-lg border border-gray-200 px-2 py-1 text-gray-300 hover:border-red-200 hover:text-red-400 transition-colors"
+            title="Delete"
           >
-            Archive
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
           </button>
-        )}
+        </div>
       </div>
 
       {/* Spacer where SVG curves live */}
