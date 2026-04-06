@@ -115,7 +115,7 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
 
       <div
         ref={taskNodeRef}
-        className={`relative z-10 w-52 shrink-0 rounded-2xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${
+        className={`relative z-10 w-52 shrink-0 rounded-2xl border bg-white p-4 shadow-sm transition-all hover:shadow-md has-[.subtask-menu-open]:z-50 ${
           isComplete ? 'border-emerald-200 bg-emerald-50/30' : 'border-indigo-100'
         }`}
       >

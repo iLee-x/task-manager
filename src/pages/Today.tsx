@@ -162,7 +162,7 @@ export default function Today() {
         ) : (
           <div className="space-y-6">
             {tasksWithTodaySubtasks.map((task) => (
-              <div key={task._id} className="glass-card rounded-2xl p-5 group">
+              <div key={task._id} className="glass-card rounded-2xl p-5 group has-[.subtask-menu-open]:z-50 has-[.subtask-menu-open]:relative">
                 <div className="mb-3 border-b border-gray-100/60 pb-3">
                   <h3 className="text-base font-semibold text-gray-800">{task.title}</h3>
                   {task.description && (

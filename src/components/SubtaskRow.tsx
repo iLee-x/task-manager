@@ -28,7 +28,7 @@ export default function SubtaskRow({ taskId, subtask }: Props) {
   }
 
   return (
-    <li className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/40 transition-colors">
+    <li className={`flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/40 transition-colors ${openMenu ? 'subtask-menu-open' : ''}`}>
       <button
         onClick={() => dispatch(toggleSubtask({ taskId, subtaskId: subtask._id }))}
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${

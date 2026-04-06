@@ -67,7 +67,7 @@ export default function TaskCard({ task, onToast }: Props) {
     : 'linear-gradient(90deg, #60a5fa, #818cf8)'
 
   return (
-    <div className={`glass-card group rounded-2xl p-5 transition-all ${isComplete ? 'ring-1 ring-emerald-200/60' : ''}`}>
+    <div className={`glass-card group rounded-2xl p-5 transition-all has-[.subtask-menu-open]:z-50 has-[.subtask-menu-open]:relative ${isComplete ? 'ring-1 ring-emerald-200/60' : ''}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           {editingTitle ? (
