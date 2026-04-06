@@ -1,13 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit'
 import tasksReducer from './tasksSlice'
 import gameReducer from './gameSlice'
+import todayReducer from './todaySlice'
 import type { Middleware } from '@reduxjs/toolkit'
 
 const localStorageMiddleware: Middleware = (store) => (next) => (action) => {
   const result = next(action)
-  const state = store.getState() as { tasks: unknown; game: unknown }
+  const state = store.getState() as { tasks: unknown; game: unknown; today: unknown }
   localStorage.setItem('task-manager-tasks', JSON.stringify(state.tasks))
   localStorage.setItem('task-manager-game', JSON.stringify(state.game))
+  localStorage.setItem('task-manager-today', JSON.stringify(state.today))
   return result
 }
 
@@ -15,6 +17,7 @@ export const store = configureStore({
   reducer: {
     tasks: tasksReducer,
     game: gameReducer,
+    today: todayReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(localStorageMiddleware),

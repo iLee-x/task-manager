@@ -4,6 +4,7 @@ import { store } from './store'
 import Navigation from './components/Navigation'
 import Home from './pages/Home'
 import Stats from './pages/Stats'
+import Today from './pages/Today'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
             <Navigation />
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/today" element={<Today />} />
               <Route path="/stats" element={<Stats />} />
             </Routes>
           </div>
