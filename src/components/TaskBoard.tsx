@@ -31,7 +31,7 @@ export default function TaskBoard() {
       <div className="mb-8">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">My Tasks</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-800">My Tasks</h1>
             <p className="mt-1 text-sm text-gray-400">
               {totalSubtasks === 0 ? 'No subtasks yet' : `${doneSubtasks} of ${totalSubtasks} subtasks complete`}
             </p>
@@ -40,15 +40,17 @@ export default function TaskBoard() {
           <div className="flex items-center gap-2">
             <Link
               to="/stats"
-              className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition-colors"
+              className="flex items-center gap-2 rounded-2xl px-3 py-2 text-sm font-semibold transition-all hover:scale-105"
+              style={{ background: 'rgba(251,191,36,0.18)', border: '1px solid rgba(251,191,36,0.35)', color: '#b45309' }}
             >
               🪙 {coins}
             </Link>
 
-            <div className="flex items-center rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+            <div className="flex items-center rounded-2xl p-1" style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.7)', backdropFilter: 'blur(12px)' }}>
               <button
                 onClick={() => setView('list')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${view === 'list' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all ${view === 'list' ? 'text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                style={view === 'list' ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' } : {}}
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
@@ -57,7 +59,8 @@ export default function TaskBoard() {
               </button>
               <button
                 onClick={() => setView('mindmap')}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${view === 'mindmap' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-gray-600'}`}
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all ${view === 'mindmap' ? 'text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                style={view === 'mindmap' ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' } : {}}
               >
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="19" cy="18" r="2"/>
@@ -69,7 +72,8 @@ export default function TaskBoard() {
 
             <button
               onClick={() => setShowModal(true)}
-              className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all"
+              className="flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-white transition-all hover:scale-105 active:scale-95"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
@@ -80,16 +84,16 @@ export default function TaskBoard() {
         </div>
 
         {totalSubtasks > 0 && (
-          <div className="mt-5 rounded-2xl bg-white border border-gray-100 shadow-sm p-4 flex items-center gap-4">
+          <div className="glass-panel mt-5 rounded-2xl p-4 flex items-center gap-4">
             <div className="flex-1">
-              <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-                <span>Overall progress</span>
+              <div className="flex justify-between text-xs mb-1.5">
+                <span className="text-gray-400">Overall progress</span>
                 <span className="font-semibold text-indigo-600">{overallProgress}%</span>
               </div>
-              <div className="h-2.5 w-full rounded-full bg-gray-100 overflow-hidden">
+              <div className="h-2.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
-                  style={{ width: `${overallProgress}%` }}
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #818cf8, #a78bfa)' }}
                 />
               </div>
             </div>
@@ -102,8 +106,8 @@ export default function TaskBoard() {
       </div>
 
       {active.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-white/50 py-24 text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+        <div className="glass-panel flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/80 py-24 text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'rgba(255,255,255,0.5)' }}>
             <svg className="h-8 w-8 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>

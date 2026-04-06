@@ -31,10 +31,18 @@ export default function AddTaskModal({ onClose }: Props) {
     onClose()
   }
 
+  const inputStyle = {
+    background: 'rgba(255,255,255,0.65)',
+    border: '1px solid rgba(255,255,255,0.75)',
+    backdropFilter: 'blur(8px)',
+  }
+  const inputFocusClass = 'outline-none focus:ring-2 focus:ring-indigo-300/40 focus:border-indigo-300/60'
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(8px)' }}>
+      <div className="glass-modal w-full max-w-md rounded-3xl overflow-hidden">
+        {/* Header */}
+        <div className="px-6 py-5" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.85), rgba(139,92,246,0.85))', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white">New Task</h2>
             <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
@@ -56,7 +64,8 @@ export default function AddTaskModal({ onClose }: Props) {
               autoFocus
               placeholder="What needs to be done?"
               onChange={() => setError('')}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-colors"
+              style={inputStyle}
+              className={`w-full rounded-xl px-4 py-2.5 text-sm text-gray-900 transition-all ${inputFocusClass}`}
             />
             {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
           </div>
@@ -67,7 +76,8 @@ export default function AddTaskModal({ onClose }: Props) {
               name="description"
               rows={2}
               placeholder="Optional notes..."
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-colors resize-none"
+              style={inputStyle}
+              className={`w-full rounded-xl px-4 py-2.5 text-sm text-gray-900 transition-all resize-none ${inputFocusClass}`}
             />
           </div>
 
@@ -79,7 +89,8 @@ export default function AddTaskModal({ onClose }: Props) {
               name="subtasks"
               rows={4}
               placeholder={'Design mockup\nWrite the API\nDeploy to production'}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-colors resize-none font-mono"
+              style={inputStyle}
+              className={`w-full rounded-xl px-4 py-2.5 text-sm text-gray-900 transition-all resize-none font-mono ${inputFocusClass}`}
             />
           </div>
 
@@ -87,13 +98,15 @@ export default function AddTaskModal({ onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+              className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-gray-500 transition-all hover:bg-white/50"
+              style={{ background: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.65)' }}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity shadow-md shadow-indigo-200"
+              className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}
             >
               Create Task
             </button>

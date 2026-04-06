@@ -75,14 +75,14 @@ export default function TaskCard({ task, onToast }: Props) {
     onToast({ baseCoins: result.baseCoins, bonusCoins: result.bonusCoins, bonusReason: result.bonusReason, key: Date.now() })
   }
 
-  const progressColor = isComplete
-    ? 'from-emerald-400 to-green-500'
+  const progressGradient = isComplete
+    ? 'linear-gradient(90deg, #34d399, #10b981)'
     : progress > 50
-    ? 'from-indigo-400 to-violet-500'
-    : 'from-indigo-400 to-blue-500'
+    ? 'linear-gradient(90deg, #818cf8, #a78bfa)'
+    : 'linear-gradient(90deg, #60a5fa, #818cf8)'
 
   return (
-    <div className={`group rounded-2xl border bg-white p-5 shadow-sm transition-all hover:shadow-md ${isComplete ? 'border-emerald-100' : 'border-gray-100'}`}>
+    <div className={`glass-card group rounded-2xl p-5 transition-all ${isComplete ? 'ring-1 ring-emerald-200/60' : ''}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           {editingTitle ? (
@@ -95,12 +95,12 @@ export default function TaskCard({ task, onToast }: Props) {
                 if (e.key === 'Enter') commitTitle()
                 if (e.key === 'Escape') { setTitleDraft(task.title); setEditingTitle(false) }
               }}
-              className="w-full rounded-lg border border-indigo-300 bg-indigo-50 px-2 py-0.5 text-base font-semibold text-gray-900 outline-none ring-2 ring-indigo-200"
+              className="w-full rounded-xl border border-indigo-300/50 bg-indigo-50/60 px-2 py-0.5 text-base font-semibold text-gray-900 outline-none ring-2 ring-indigo-200/60 backdrop-blur-sm"
             />
           ) : (
             <div className="flex items-center gap-1.5 group/title">
               <h3
-                className="truncate text-base font-semibold text-gray-900 cursor-pointer hover:text-indigo-600 transition-colors"
+                className="truncate text-base font-semibold text-gray-800 cursor-pointer hover:text-indigo-600 transition-colors"
                 onClick={() => setEditingTitle(true)}
                 title="Click to edit"
               >
@@ -125,7 +125,8 @@ export default function TaskCard({ task, onToast }: Props) {
           {isComplete && (
             <button
               onClick={handleArchive}
-              className="flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-600 hover:bg-emerald-100 transition-colors border border-emerald-100"
+              className="flex items-center gap-1 rounded-xl px-3 py-1 text-xs font-semibold transition-all hover:scale-105"
+              style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', color: '#059669' }}
             >
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -135,7 +136,7 @@ export default function TaskCard({ task, onToast }: Props) {
           )}
           <button
             onClick={() => { if (confirm('Delete this task?')) dispatch(deleteTask(task._id)) }}
-            className="rounded-lg border border-gray-200 p-1 text-gray-300 hover:border-red-200 hover:text-red-400 transition-colors"
+            className="rounded-xl border border-gray-200/60 p-1 text-gray-300 hover:border-red-200 hover:text-red-400 transition-colors bg-white/30"
             title="Delete task"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -150,10 +151,10 @@ export default function TaskCard({ task, onToast }: Props) {
           <span className="text-gray-400">{done}/{total} subtasks</span>
           <span className={`font-semibold ${isComplete ? 'text-emerald-500' : 'text-indigo-500'}`}>{progress}%</span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
           <div
-            className={`h-full rounded-full bg-gradient-to-r ${progressColor} transition-all duration-500`}
-            style={{ width: `${progress}%` }}
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${progress}%`, background: progressGradient }}
           />
         </div>
       </div>
@@ -161,11 +162,13 @@ export default function TaskCard({ task, onToast }: Props) {
       {task.subtasks.length > 0 && (
         <ul className="mt-4 space-y-1">
           {task.subtasks.map((subtask) => (
-            <li key={subtask._id} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-gray-50 transition-colors">
+            <li key={subtask._id} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/40 transition-colors">
               <button
                 onClick={() => dispatch(toggleSubtask({ taskId: task._id, subtaskId: subtask._id }))}
                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                  subtask.done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-200 hover:border-indigo-400'
+                  subtask.done
+                    ? 'border-emerald-400 bg-emerald-400 text-white'
+                    : 'border-gray-300/70 hover:border-indigo-400 bg-white/50'
                 }`}
               >
                 {subtask.done && (
@@ -185,7 +188,7 @@ export default function TaskCard({ task, onToast }: Props) {
                     if (e.key === 'Enter') commitSubtask(subtask._id)
                     if (e.key === 'Escape') setEditingSubtask(null)
                   }}
-                  className="flex-1 min-w-0 rounded-lg border border-indigo-300 bg-indigo-50 px-2 py-0.5 text-sm outline-none ring-1 ring-indigo-100"
+                  className="flex-1 min-w-0 rounded-lg border border-indigo-300/50 bg-indigo-50/60 px-2 py-0.5 text-sm outline-none ring-1 ring-indigo-100"
                 />
               ) : (
                 <span
@@ -214,15 +217,16 @@ export default function TaskCard({ task, onToast }: Props) {
                 if (e.key === 'Escape') { setShowInput(false); setNewSubtask('') }
               }}
               placeholder="New subtask..."
-              className="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 focus:bg-white"
+              className="flex-1 rounded-xl px-3 py-1.5 text-sm outline-none transition-all"
+              style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}
             />
-            <button onClick={handleAddSubtask} className="rounded-xl bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700">Add</button>
-            <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-xl border border-gray-200 px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-50">✕</button>
+            <button onClick={handleAddSubtask} className="rounded-xl px-3 py-1.5 text-sm font-medium text-white transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>Add</button>
+            <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-xl border border-gray-200/60 px-3 py-1.5 text-sm text-gray-500 hover:bg-white/40 bg-white/30">✕</button>
           </div>
         ) : (
           <button
             onClick={() => setShowInput(true)}
-            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 transition-colors"
+            className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-indigo-500 hover:bg-indigo-50/50 transition-colors"
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />

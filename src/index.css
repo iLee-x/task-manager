@@ -1,5 +1,33 @@
 @import "tailwindcss";
 
+/* ── Animated blobs background ──────────────────────── */
+
+@keyframes blob-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(40px, -30px) scale(1.08); }
+  66%       { transform: translate(-20px, 20px) scale(0.95); }
+}
+@keyframes blob-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-50px, 30px) scale(1.05); }
+  66%       { transform: translate(30px, -20px) scale(1.1); }
+}
+@keyframes blob-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(20px, 40px) scale(0.92); }
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.blob-1 { animation: blob-1 18s ease-in-out infinite; }
+.blob-2 { animation: blob-2 22s ease-in-out infinite; }
+.blob-3 { animation: blob-3 15s ease-in-out infinite; }
+
 /* ── 3D Badge animations ────────────────────────────── */
 
 @keyframes badge-spin {
@@ -39,4 +67,43 @@
 
 .badge-shadow {
   filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.35));
+}
+
+/* ── Liquid glass panel ─────────────────────────────── */
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.58);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(255,255,255,0.8) inset;
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 20px rgba(0, 0, 0, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05), 0 1px 0px rgba(255,255,255,0.9) inset;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.glass-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.09), 0 1px 0px rgba(255,255,255,0.9) inset;
+}
+
+.glass-modal {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12), 0 1px 0px rgba(255,255,255,0.9) inset;
 }
