@@ -4,7 +4,7 @@ import type { RootState } from '@/store'
 
 export default function Navigation() {
   const coins = useSelector((s: RootState) => s.game.coins)
-  const todayCount = useSelector((s: RootState) => s.today.taskIds.length)
+  const todayCount = useSelector((s: RootState) => s.today.subtaskIds.length)
   const { pathname } = useLocation()
 
   return (

@@ -7,19 +7,21 @@ function todayKey() {
 
 interface TodayState {
   date: string
-  taskIds: string[]
+  subtaskIds: string[]
 }
 
 function loadInitial(): TodayState {
   try {
     const raw = localStorage.getItem('task-manager-today')
     if (raw) {
-      const parsed = JSON.parse(raw) as TodayState
-      // Auto-reset if the stored date is not today
-      if (parsed.date === todayKey()) return parsed
+      // Support old shape: if 'taskIds' is present but no 'subtaskIds', we'll reset.
+      const parsed = JSON.parse(raw) as any
+      if (parsed.date === todayKey() && Array.isArray(parsed.subtaskIds)) {
+        return { date: parsed.date, subtaskIds: parsed.subtaskIds }
+      }
     }
   } catch { /* ignore */ }
-  return { date: todayKey(), taskIds: [] }
+  return { date: todayKey(), subtaskIds: [] }
 }
 
 const todaySlice = createSlice({
@@ -30,21 +32,21 @@ const todaySlice = createSlice({
       // Reset if date changed
       if (state.date !== todayKey()) {
         state.date = todayKey()
-        state.taskIds = []
+        state.subtaskIds = []
       }
       const id = action.payload
-      const idx = state.taskIds.indexOf(id)
+      const idx = state.subtaskIds.indexOf(id)
       if (idx >= 0) {
-        state.taskIds.splice(idx, 1)
+        state.subtaskIds.splice(idx, 1)
       } else {
-        state.taskIds.push(id)
+        state.subtaskIds.push(id)
       }
     },
     removeFromToday(state, action: PayloadAction<string>) {
-      state.taskIds = state.taskIds.filter((id) => id !== action.payload)
+      state.subtaskIds = state.subtaskIds.filter((id) => id !== action.payload)
     },
     clearToday(state) {
-      state.taskIds = []
+      state.subtaskIds = []
       state.date = todayKey()
     },
   },

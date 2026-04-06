@@ -49,12 +49,19 @@ const tasksSlice = createSlice({
     deleteTask(state, action: PayloadAction<string>) {
       return state.filter((t) => t._id !== action.payload)
     },
+    setSubtaskPriority(state, action: PayloadAction<{ taskId: string; subtaskId: string; priority: 'high' | 'medium' | 'low' | undefined }>) {
+      const t = state.find((t) => t._id === action.payload.taskId)
+      if (t) {
+        const s = t.subtasks.find((s) => s._id === action.payload.subtaskId)
+        if (s) s.priority = action.payload.priority
+      }
+    },
   },
 })
 
 export const {
   addTask, renameTask, renameSubtask, toggleSubtask,
-  addSubtask, archiveTask, unarchiveTask, deleteTask,
+  addSubtask, archiveTask, unarchiveTask, deleteTask, setSubtaskPriority,
 } = tasksSlice.actions
 
 export default tasksSlice.reducer

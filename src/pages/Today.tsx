@@ -1,24 +1,31 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom'
 import type { RootState, AppDispatch } from '@/store'
-import { clearToday, removeFromToday } from '@/store/todaySlice'
-import TaskCard from '@/components/TaskCard'
+import { clearToday } from '@/store/todaySlice'
+import SubtaskRow from '@/components/SubtaskRow'
 import CoinToast from '@/components/CoinToast'
 import type { ToastData } from '@/components/CoinToast'
 import { useState } from 'react'
+import type { Task, Subtask } from '@/types'
 
 export default function Today() {
   const tasks = useSelector((s: RootState) => s.tasks)
-  const todayIds = useSelector((s: RootState) => s.today.taskIds)
+  const todaySubtaskIds = useSelector((s: RootState) => s.today.subtaskIds)
   const dispatch = useDispatch<AppDispatch>()
   const [toast, setToast] = useState<ToastData | null>(null)
 
-  const todayTasks = todayIds
-    .map((id) => tasks.find((t) => t._id === id))
-    .filter((t): t is NonNullable<typeof t> => t != null && !t.archived)
+  // Group subtasks by task
+  const tasksWithTodaySubtasks = tasks
+    .filter(t => !t.archived)
+    .map(t => ({
+      ...t,
+      subtasks: t.subtasks.filter(st => todaySubtaskIds.includes(st._id))
+    }))
+    .filter(t => t.subtasks.length > 0)
 
-  const totalSubtasks = todayTasks.reduce((s, t) => s + t.subtasks.length, 0)
-  const doneSubtasks = todayTasks.reduce((s, t) => s + t.subtasks.filter((st) => st.done).length, 0)
+  const flatTodaySubtasks = tasksWithTodaySubtasks.flatMap(t => t.subtasks)
+  const totalSubtasks = flatTodaySubtasks.length
+  const doneSubtasks = flatTodaySubtasks.filter((st) => st.done).length
   const progress = totalSubtasks === 0 ? 0 : Math.round((doneSubtasks / totalSubtasks) * 100)
 
   const now = new Date()
@@ -28,7 +35,6 @@ export default function Today() {
     day: 'numeric',
   })
 
-  // Motivational greetings based on progress
   function getGreeting() {
     const hour = now.getHours()
     if (hour < 12) return 'Good morning'
@@ -37,8 +43,8 @@ export default function Today() {
   }
 
   function getMotivation() {
-    if (todayTasks.length === 0) return "Star some tasks to focus on today!"
-    if (progress === 100) return "🎉 All tasks complete! You're amazing!"
+    if (totalSubtasks === 0) return "Add some priority subtasks to your focus for today!"
+    if (progress === 100) return "🎉 All focused tasks complete! You're amazing!"
     if (progress >= 75) return "Almost there! Keep pushing! 💪"
     if (progress >= 50) return "Halfway done — great momentum! 🚀"
     if (progress > 0) return "Great start! Keep the flow going ✨"
@@ -49,7 +55,6 @@ export default function Today() {
     <main className="flex-1 px-4 py-8">
       <div className="mx-auto max-w-4xl">
 
-        {/* Back link */}
         <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-indigo-600 transition-colors mb-6">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
@@ -57,7 +62,6 @@ export default function Today() {
           Back to all tasks
         </Link>
 
-        {/* Hero header */}
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -68,7 +72,7 @@ export default function Today() {
               <p className="mt-2 text-sm text-gray-400">{getMotivation()}</p>
             </div>
 
-            {todayTasks.length > 0 && (
+            {totalSubtasks > 0 && (
               <button
                 onClick={() => dispatch(clearToday())}
                 className="flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-gray-400 transition-all hover:text-red-500 hover:bg-red-50/50"
@@ -82,8 +86,7 @@ export default function Today() {
             )}
           </div>
 
-          {/* Progress bar for today */}
-          {todayTasks.length > 0 && totalSubtasks > 0 && (
+          {totalSubtasks > 0 && (
             <div className="glass-panel mt-5 rounded-2xl p-4 flex items-center gap-4">
               <div className="flex-1">
                 <div className="flex justify-between text-xs mb-1.5">
@@ -111,8 +114,7 @@ export default function Today() {
             </div>
           )}
 
-          {/* Task count chips */}
-          {todayTasks.length > 0 && (
+          {totalSubtasks > 0 && (
             <div className="mt-4 flex items-center gap-3">
               <span
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
@@ -121,7 +123,7 @@ export default function Today() {
                 <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
-                {todayTasks.length} task{todayTasks.length !== 1 ? 's' : ''} for today
+                {totalSubtasks} subtask{totalSubtasks !== 1 ? 's' : ''} for today
               </span>
               {progress === 100 && (
                 <span
@@ -135,17 +137,16 @@ export default function Today() {
           )}
         </div>
 
-        {/* Task cards or empty state */}
-        {todayTasks.length === 0 ? (
+        {totalSubtasks === 0 ? (
           <div className="glass-panel flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-white/80 py-24 text-center">
             <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: 'rgba(255,255,255,0.5)' }}>
               <svg className="h-10 w-10 text-amber-300" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-gray-400">No tasks for today yet</p>
+            <p className="text-sm font-semibold text-gray-400">No subtasks selected for today</p>
             <p className="mt-1 text-xs text-gray-300 max-w-xs">
-              Go to your task list and tap the ⭐ star icon on any task to add it to today's focus
+              Go to your task list and tap the ... menu on any subtask to add it to today's focus
             </p>
             <Link
               to="/"
@@ -159,10 +160,20 @@ export default function Today() {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
-            {todayTasks.map((task) => (
-              <div key={task._id} className="relative">
-                <TaskCard task={task} onToast={setToast} />
+          <div className="space-y-6">
+            {tasksWithTodaySubtasks.map((task) => (
+              <div key={task._id} className="glass-card rounded-2xl p-5 group">
+                <div className="mb-3 border-b border-gray-100/60 pb-3">
+                  <h3 className="text-base font-semibold text-gray-800">{task.title}</h3>
+                  {task.description && (
+                    <p className="mt-0.5 text-sm text-gray-400 line-clamp-1">{task.description}</p>
+                  )}
+                </div>
+                <ul className="space-y-1">
+                   {task.subtasks.map(st => (
+                     <SubtaskRow key={st._id} taskId={task._id} subtask={st} />
+                   ))}
+                </ul>
               </div>
             ))}
           </div>

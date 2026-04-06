@@ -1,14 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { useDispatch } from 'react-redux'
-import type { AppDispatch } from '@/store'
-import { renameTask, renameSubtask, toggleSubtask, addSubtask, archiveTask, deleteTask } from '@/store/tasksSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import type { AppDispatch, RootState } from '@/store'
+import { renameTask, addSubtask, archiveTask, deleteTask } from '@/store/tasksSlice'
 import { applyCoins } from '@/store/gameSlice'
-import { toggleToday } from '@/store/todaySlice'
 import { calcCoins } from '@/lib/gameData'
-import { useSelector } from 'react-redux'
-import type { RootState } from '@/store'
 import type { Task } from '@/types'
 import type { ToastData } from './CoinToast'
+import SubtaskRow from './SubtaskRow'
 
 interface Props {
   task: Task
@@ -18,14 +16,11 @@ interface Props {
 export default function TaskCard({ task, onToast }: Props) {
   const dispatch = useDispatch<AppDispatch>()
   const game = useSelector((s: RootState) => s.game)
-  const isToday = useSelector((s: RootState) => s.today.taskIds.includes(task._id))
 
   const [newSubtask, setNewSubtask] = useState('')
   const [showInput, setShowInput] = useState(false)
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(task.title)
-  const [editingSubtask, setEditingSubtask] = useState<string | null>(null)
-  const [subtaskDraft, setSubtaskDraft] = useState('')
   const titleInputRef = useRef<HTMLInputElement>(null)
 
   const total = task.subtasks.length
@@ -42,18 +37,6 @@ export default function TaskCard({ task, onToast }: Props) {
     if (trimmed && trimmed !== task.title) dispatch(renameTask({ taskId: task._id, title: trimmed }))
     else setTitleDraft(task.title)
     setEditingTitle(false)
-  }
-
-  function startEditSubtask(subtaskId: string, currentTitle: string) {
-    setEditingSubtask(subtaskId)
-    setSubtaskDraft(currentTitle)
-  }
-
-  function commitSubtask(subtaskId: string) {
-    const trimmed = subtaskDraft.trim()
-    const original = task.subtasks.find((s) => s._id === subtaskId)?.title ?? ''
-    if (trimmed && trimmed !== original) dispatch(renameSubtask({ taskId: task._id, subtaskId, title: trimmed }))
-    setEditingSubtask(null)
   }
 
   function handleAddSubtask() {
@@ -124,22 +107,6 @@ export default function TaskCard({ task, onToast }: Props) {
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
-          {/* Today's focus star */}
-          <button
-            onClick={() => dispatch(toggleToday(task._id))}
-            className={`rounded-xl p-1.5 transition-all hover:scale-110 ${
-              isToday
-                ? 'text-amber-400 hover:text-amber-500'
-                : 'text-gray-300 hover:text-amber-400'
-            }`}
-            title={isToday ? "Remove from today's focus" : "Add to today's focus"}
-            style={isToday ? { filter: 'drop-shadow(0 0 6px rgba(251,191,36,0.5))' } : {}}
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill={isToday ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-            </svg>
-          </button>
-
           {isComplete && (
             <button
               onClick={handleArchive}
@@ -180,45 +147,7 @@ export default function TaskCard({ task, onToast }: Props) {
       {task.subtasks.length > 0 && (
         <ul className="mt-4 space-y-1">
           {task.subtasks.map((subtask) => (
-            <li key={subtask._id} className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/40 transition-colors">
-              <button
-                onClick={() => dispatch(toggleSubtask({ taskId: task._id, subtaskId: subtask._id }))}
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                  subtask.done
-                    ? 'border-emerald-400 bg-emerald-400 text-white'
-                    : 'border-gray-300/70 hover:border-indigo-400 bg-white/50'
-                }`}
-              >
-                {subtask.done && (
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-
-              {editingSubtask === subtask._id ? (
-                <input
-                  autoFocus
-                  value={subtaskDraft}
-                  onChange={(e) => setSubtaskDraft(e.target.value)}
-                  onBlur={() => commitSubtask(subtask._id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') commitSubtask(subtask._id)
-                    if (e.key === 'Escape') setEditingSubtask(null)
-                  }}
-                  className="flex-1 min-w-0 rounded-lg border border-indigo-300/50 bg-indigo-50/60 px-2 py-0.5 text-sm outline-none ring-1 ring-indigo-100"
-                />
-              ) : (
-                <span
-                  onClick={() => !subtask.done && startEditSubtask(subtask._id, subtask.title)}
-                  className={`flex-1 text-sm select-none transition-colors ${
-                    subtask.done ? 'text-gray-300 line-through' : 'text-gray-600 cursor-pointer hover:text-indigo-600'
-                  }`}
-                >
-                  {subtask.title}
-                </span>
-              )}
-            </li>
+            <SubtaskRow key={subtask._id} taskId={task._id} subtask={subtask} />
           ))}
         </ul>
       )}
