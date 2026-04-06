@@ -106,7 +106,7 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
   }
 
   return (
-    <div ref={containerRef} className="relative flex items-center py-3">
+    <div ref={containerRef} className="relative flex items-center py-3 has-[.subtask-menu-open]:z-50">
       <svg
         ref={svgRef}
         className="absolute inset-0 pointer-events-none"
@@ -115,7 +115,7 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
 
       <div
         ref={taskNodeRef}
-        className={`relative z-10 w-52 shrink-0 rounded-2xl border bg-white p-4 shadow-sm transition-all hover:shadow-md has-[.subtask-menu-open]:z-50 ${
+        className={`relative z-10 w-52 shrink-0 rounded-2xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${
           isComplete ? 'border-emerald-200 bg-emerald-50/30' : 'border-indigo-100'
         }`}
       >
@@ -187,7 +187,7 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
 
       <div className="w-20 shrink-0" />
 
-      <div className="relative z-10 flex flex-col gap-2">
+      <div className="relative z-10 flex flex-col gap-2 has-[.subtask-menu-open]:z-50">
         {task.subtasks.map((subtask) => (
           <div
             key={subtask._id}
@@ -195,7 +195,7 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
               if (el) subtaskRefs.current.set(subtask._id, el)
               else subtaskRefs.current.delete(subtask._id)
             }}
-            className={`flex items-center gap-2.5 rounded-xl border bg-white px-3 py-2.5 shadow-sm min-w-[170px] transition-all hover:shadow-md ${
+            className={`flex items-center gap-2.5 rounded-xl border bg-white px-3 py-2.5 shadow-sm min-w-[170px] transition-all hover:shadow-md ${openMenuId === subtask._id ? 'subtask-menu-open z-50 relative' : ''} ${
               subtask.done ? 'border-emerald-100 bg-emerald-50/40' : 'border-gray-100'
             }`}
           >
@@ -250,7 +250,7 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
             )}
 
             {/* Subtask Menu Toggle */}
-            <div className="relative isolate">
+            <div className="relative">
               <button
                 onClick={() => setOpenMenuId(openMenuId === subtask._id ? null : subtask._id)}
                 className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
