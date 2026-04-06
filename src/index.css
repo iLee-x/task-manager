@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/* ── 3D Badge animations ────────────────────────────── */
+
+@keyframes badge-spin {
+  0%   { transform: rotateY(0deg); }
+  100% { transform: rotateY(360deg); }
+}
+
+@keyframes badge-shine {
+  0%        { transform: translateX(-180%) skewX(-20deg); }
+  60%, 100% { transform: translateX(300%) skewX(-20deg); }
+}
+
+@keyframes badge-glow-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+/* ── City marker pulse ──────────────────────────────── */
+
+@keyframes city-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.7); }
+}
+
+/* ── Toast slide-up ─────────────────────────────────── */
+
+@keyframes toast-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.toast-enter {
+  animation: toast-in 0.3s ease-out forwards;
+}
+
+/* ── Badge shadow below ─────────────────────────────── */
+
+.badge-shadow {
+  filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.35));
+}

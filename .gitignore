@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vite build artifacts
+/dist
+vite.config.js
+vite.config.d.ts
+
+# claude code
+.claude/
