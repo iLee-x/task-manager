@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import type { RootState } from '@/store'
@@ -15,8 +15,14 @@ export default function TaskBoard() {
   const tasks = useSelector((s: RootState) => s.tasks)
   const coins = useSelector((s: RootState) => s.game.coins)
   const [showModal, setShowModal] = useState(false)
-  const [view, setView] = useState<View>('list')
+  const [view, setView] = useState<View>(() => {
+    return (localStorage.getItem('task-manager-view') as View) || 'list'
+  })
   const [toast, setToast] = useState<ToastData | null>(null)
+
+  useEffect(() => {
+    localStorage.setItem('task-manager-view', view)
+  }, [view])
 
   const active = tasks.filter((t) => !t.archived)
   const archived = tasks.filter((t) => t.archived)
