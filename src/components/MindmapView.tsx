@@ -1,9 +1,10 @@
 import { useRef, useLayoutEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import type { AppDispatch } from '@/store'
-import { renameTask, renameSubtask, toggleSubtask, addSubtask, archiveTask, deleteTask } from '@/store/tasksSlice'
+import { renameTask, renameSubtask, toggleSubtask, addSubtask, archiveTask, deleteTask, setSubtaskPriority } from '@/store/tasksSlice'
 import { applyCoins } from '@/store/gameSlice'
 import { calcCoins } from '@/lib/gameData'
+import { toggleToday } from '@/store/todaySlice'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
 import type { Task } from '@/types'
@@ -26,8 +27,10 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
   const [titleDraft, setTitleDraft] = useState(task.title)
   const [editingSubtask, setEditingSubtask] = useState<string | null>(null)
   const [subtaskDraft, setSubtaskDraft] = useState('')
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [showAddInput, setShowAddInput] = useState(false)
   const [newSubtask, setNewSubtask] = useState('')
+  const todaySubtaskIds = useSelector((s: RootState) => s.today.subtaskIds)
 
   const total = task.subtasks.length
   const done = task.subtasks.filter((s) => s.done).length
@@ -222,15 +225,74 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
                 className="flex-1 min-w-0 rounded border border-indigo-300 bg-white px-1 py-0 text-sm outline-none ring-1 ring-indigo-100"
               />
             ) : (
-              <span
-                onClick={() => !subtask.done && (setEditingSubtask(subtask._id), setSubtaskDraft(subtask.title))}
-                className={`text-sm truncate transition-colors ${
-                  subtask.done ? 'text-gray-300 line-through' : 'text-gray-600 cursor-pointer hover:text-indigo-600'
-                }`}
-              >
-                {subtask.title}
-              </span>
+              <div className="flex flex-1 items-center gap-2 min-w-0">
+                <span
+                  onClick={() => !subtask.done && (setEditingSubtask(subtask._id), setSubtaskDraft(subtask.title))}
+                  className={`text-sm truncate transition-colors ${
+                    subtask.done ? 'text-gray-300 line-through' : 'text-gray-600 cursor-pointer hover:text-indigo-600'
+                  }`}
+                >
+                  {subtask.title}
+                </span>
+
+                {/* Badges */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {subtask.priority === 'high' && <span className="flex items-center rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600 border border-red-200/50">High</span>}
+                  {subtask.priority === 'medium' && <span className="flex items-center rounded bg-orange-50 px-1.5 py-0.5 text-[10px] font-bold text-orange-600 border border-orange-200/50">Med</span>}
+                  {subtask.priority === 'low' && <span className="flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 border border-blue-200/50">Low</span>}
+                  {todaySubtaskIds.includes(subtask._id) && (
+                    <span className="flex items-center justify-center text-amber-500" title="Today's Focus">
+                      <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    </span>
+                  )}
+                </div>
+              </div>
             )}
+
+            {/* Subtask Menu Toggle */}
+            <div className="relative isolate">
+              <button
+                onClick={() => setOpenMenuId(openMenuId === subtask._id ? null : subtask._id)}
+                className="flex h-5 w-5 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+              </button>
+
+              {openMenuId === subtask._id && (
+                <div className="absolute right-0 top-full mt-1 z-30 w-44 rounded-xl border border-gray-100 bg-white shadow-xl shadow-gray-200/40 p-1 flex flex-col">
+                  <div className="px-2 py-1.5 text-[10px] font-bold tracking-wider text-gray-400 uppercase">Priority</div>
+                  <button
+                    onClick={() => { dispatch(setSubtaskPriority({ taskId: task._id, subtaskId: subtask._id, priority: 'high' })); setOpenMenuId(null); }}
+                    className={`text-left px-2 py-1.5 text-xs font-medium rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors ${subtask.priority === 'high' ? 'bg-red-50 text-red-600' : 'text-gray-600'}`}
+                  >High</button>
+                  <button
+                    onClick={() => { dispatch(setSubtaskPriority({ taskId: task._id, subtaskId: subtask._id, priority: 'medium' })); setOpenMenuId(null); }}
+                    className={`text-left px-2 py-1.5 text-xs font-medium rounded-lg hover:bg-orange-50 hover:text-orange-600 transition-colors ${subtask.priority === 'medium' ? 'bg-orange-50 text-orange-600' : 'text-gray-600'}`}
+                  >Medium</button>
+                  <button
+                    onClick={() => { dispatch(setSubtaskPriority({ taskId: task._id, subtaskId: subtask._id, priority: 'low' })); setOpenMenuId(null); }}
+                    className={`text-left px-2 py-1.5 text-xs font-medium rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors ${subtask.priority === 'low' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'}`}
+                  >Low</button>
+                  <button
+                    onClick={() => { dispatch(setSubtaskPriority({ taskId: task._id, subtaskId: subtask._id, priority: undefined })); setOpenMenuId(null); }}
+                    className="text-left px-2 py-1.5 text-xs font-medium rounded-lg text-gray-500 hover:bg-gray-50 transition-colors"
+                  >Clear Priority</button>
+                  
+                  <div className="my-1 h-px bg-gray-100 mx-1" />
+                  
+                  <button
+                    onClick={() => { dispatch(toggleToday(subtask._id)); setOpenMenuId(null); }}
+                    className="text-left px-2 py-1.5 text-xs font-semibold rounded-lg text-amber-600 hover:bg-amber-50 transition-colors"
+                  >
+                    {todaySubtaskIds.includes(subtask._id) ? "Remove from Today" : "Add to Today's Focus"}
+                  </button>
+                  
+                  <div className="fixed inset-0 z-[-1]" onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); }} />
+                </div>
+              )}
+            </div>
           </div>
         ))}
 
