@@ -10,6 +10,7 @@ import CountryMap from '@/components/CountryMap'
 
 export default function Stats() {
   const game = useSelector((s: RootState) => s.game)
+  const tasks = useSelector((s: RootState) => s.tasks)
   const dispatch = useDispatch<AppDispatch>()
   const [buyMsg, setBuyMsg] = useState('')
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
@@ -92,7 +93,7 @@ export default function Stats() {
         {/* Activity heatmap */}
         <div className="glass-panel rounded-2xl p-6">
           <h2 className="text-base font-semibold text-gray-700 mb-4">Activity</h2>
-          <Heatmap activityLog={game.activityLog} />
+          <Heatmap activityLog={game.activityLog} tasks={tasks} />
         </div>
 
         {/* World Map */}

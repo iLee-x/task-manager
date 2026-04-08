@@ -22,6 +22,7 @@ export interface Task {
   description?: string
   subtasks: Subtask[]
   archived: boolean
+  archivedAt?: string
   createdAt: string
   updatedAt: string
 }

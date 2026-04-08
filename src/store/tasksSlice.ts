@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import type { Task, Subtask } from '@/types'
+import { today } from '@/lib/gameData'
 
 function loadInitial(): Task[] {
   try {
@@ -40,7 +41,7 @@ const tasksSlice = createSlice({
     },
     archiveTask(state, action: PayloadAction<string>) {
       const t = state.find((t) => t._id === action.payload)
-      if (t) t.archived = true
+      if (t) { t.archived = true; t.archivedAt = today() }
     },
     unarchiveTask(state, action: PayloadAction<string>) {
       const t = state.find((t) => t._id === action.payload)
