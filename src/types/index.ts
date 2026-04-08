@@ -13,6 +13,7 @@ export interface Subtask {
   _id: string
   title: string
   done: boolean
+  completedAt?: string
   priority?: 'high' | 'medium' | 'low'
 }
 

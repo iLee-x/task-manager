@@ -32,7 +32,10 @@ const tasksSlice = createSlice({
       const t = state.find((t) => t._id === action.payload.taskId)
       if (t) {
         const s = t.subtasks.find((s) => s._id === action.payload.subtaskId)
-        if (s) s.done = !s.done
+        if (s) {
+          s.done = !s.done
+          s.completedAt = s.done ? today() : undefined
+        }
       }
     },
     addSubtask(state, action: PayloadAction<{ taskId: string; subtask: Subtask }>) {
