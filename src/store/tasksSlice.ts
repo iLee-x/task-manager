@@ -39,9 +39,9 @@ const tasksSlice = createSlice({
       const t = state.find((t) => t._id === action.payload.taskId)
       if (t) t.subtasks.push(action.payload.subtask)
     },
-    archiveTask(state, action: PayloadAction<string>) {
-      const t = state.find((t) => t._id === action.payload)
-      if (t) { t.archived = true; t.archivedAt = today() }
+    archiveTask(state, action: PayloadAction<{ id: string; coinsEarned: number }>) {
+      const t = state.find((t) => t._id === action.payload.id)
+      if (t) { t.archived = true; t.archivedAt = today(); t.coinsEarned = action.payload.coinsEarned }
     },
     unarchiveTask(state, action: PayloadAction<string>) {
       const t = state.find((t) => t._id === action.payload)

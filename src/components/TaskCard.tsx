@@ -56,7 +56,7 @@ export default function TaskCard({ task, onToast }: Props) {
       todayKey: result.todayKey,
       lastStreakBonus: result.bonusCoins > 0 ? result.streak : game.lastStreakBonus,
     }))
-    dispatch(archiveTask(task._id))
+    dispatch(archiveTask({ id: task._id, coinsEarned: result.baseCoins + result.bonusCoins }))
     onToast({ baseCoins: result.baseCoins, bonusCoins: result.bonusCoins, bonusReason: result.bonusReason, key: Date.now() })
   }
 

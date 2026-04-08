@@ -121,16 +121,21 @@ export default function Heatmap({ activityLog, tasks }: Props) {
 
   return (
     <div className="overflow-x-auto" onMouseLeave={() => setTooltip(null)}>
-      <div className="flex items-center justify-between mb-3">
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className="text-sm text-gray-600 rounded-lg px-2.5 py-1.5 border border-gray-200 bg-white/60 focus:outline-none focus:ring-2 focus:ring-indigo-300 cursor-pointer"
-        >
-          {years.map((y) => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
+      <div className="flex items-center gap-1.5 mb-4 flex-wrap">
+        {years.map((y) => (
+          <button
+            key={y}
+            onClick={() => setSelectedYear(y)}
+            className="rounded-full px-3 py-1 text-xs font-semibold transition-all"
+            style={
+              y === selectedYear
+                ? { background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: 'white', boxShadow: '0 2px 8px rgba(99,102,241,0.35)' }
+                : { background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(99,102,241,0.2)', color: '#6b7280' }
+            }
+          >
+            {y}
+          </button>
+        ))}
       </div>
 
       <div style={{ minWidth: weekCount * step + 36 }}>

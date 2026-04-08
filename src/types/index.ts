@@ -23,6 +23,7 @@ export interface Task {
   subtasks: Subtask[]
   archived: boolean
   archivedAt?: string
+  coinsEarned?: number
   createdAt: string
   updatedAt: string
 }

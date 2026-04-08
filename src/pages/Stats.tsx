@@ -96,6 +96,50 @@ export default function Stats() {
           <Heatmap activityLog={game.activityLog} tasks={tasks} />
         </div>
 
+        {/* Completion history */}
+        {(() => {
+          const history = tasks
+            .filter((t) => t.archived && t.archivedAt)
+            .slice()
+            .sort((a, b) => (b.archivedAt! > a.archivedAt! ? 1 : -1))
+          if (history.length === 0) return null
+          return (
+            <div className="glass-panel rounded-2xl p-6">
+              <h2 className="text-base font-semibold text-gray-700 mb-1">Completion History</h2>
+              <p className="text-xs text-gray-400 mb-4">{history.length} task{history.length !== 1 ? 's' : ''} completed in total</p>
+              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                {history.map((t) => {
+                  const label = new Date(t.archivedAt! + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                  return (
+                    <div
+                      key={t._id}
+                      className="flex items-center gap-3 rounded-xl px-4 py-2.5"
+                      style={{ background: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.7)' }}
+                    >
+                      <div
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm"
+                        style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.25)' }}
+                      >
+                        ✓
+                      </div>
+                      <span className="flex-1 text-sm font-medium text-gray-700 truncate">{t.title}</span>
+                      <span className="shrink-0 text-xs text-gray-400">{label}</span>
+                      {t.coinsEarned != null && (
+                        <span
+                          className="shrink-0 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
+                          style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', color: '#b45309' }}
+                        >
+                          🪙 {t.coinsEarned}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
+
         {/* World Map */}
         <div className="glass-panel rounded-2xl p-6">
           <h2 className="text-base font-semibold text-gray-700 mb-1">World Map</h2>
