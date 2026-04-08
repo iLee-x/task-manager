@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import type { AppDispatch, RootState } from '@/store'
+import { useDispatch } from 'react-redux'
+import type { AppDispatch } from '@/store'
 import { renameTask, addSubtask, archiveTask, deleteTask } from '@/store/tasksSlice'
-import { applyCoins } from '@/store/gameSlice'
-import { calcCoins } from '@/lib/gameData'
 import type { Task } from '@/types'
 import type { ToastData } from './CoinToast'
 import SubtaskRow from './SubtaskRow'
@@ -15,7 +13,6 @@ interface Props {
 
 export default function TaskCard({ task, onToast }: Props) {
   const dispatch = useDispatch<AppDispatch>()
-  const game = useSelector((s: RootState) => s.game)
 
   const [newSubtask, setNewSubtask] = useState('')
   const [showInput, setShowInput] = useState(false)
@@ -48,16 +45,7 @@ export default function TaskCard({ task, onToast }: Props) {
   }
 
   function handleArchive() {
-    const result = calcCoins(game)
-    dispatch(applyCoins({
-      baseCoins: result.baseCoins,
-      bonusCoins: result.bonusCoins,
-      streak: result.streak,
-      todayKey: result.todayKey,
-      lastStreakBonus: result.bonusCoins > 0 ? result.streak : game.lastStreakBonus,
-    }))
-    dispatch(archiveTask({ id: task._id, coinsEarned: result.baseCoins + result.bonusCoins }))
-    onToast({ baseCoins: result.baseCoins, bonusCoins: result.bonusCoins, bonusReason: result.bonusReason, key: Date.now() })
+    dispatch(archiveTask({ id: task._id, coinsEarned: 0 }))
   }
 
   const progressGradient = isComplete
@@ -147,7 +135,7 @@ export default function TaskCard({ task, onToast }: Props) {
       {task.subtasks.length > 0 && (
         <ul className="mt-4 space-y-1">
           {task.subtasks.map((subtask) => (
-            <SubtaskRow key={subtask._id} taskId={task._id} subtask={subtask} />
+            <SubtaskRow key={subtask._id} taskId={task._id} subtask={subtask} onToast={onToast} />
           ))}
         </ul>
       )}

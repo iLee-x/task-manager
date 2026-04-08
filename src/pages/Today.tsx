@@ -171,7 +171,7 @@ export default function Today() {
                 </div>
                 <ul className="space-y-1">
                    {task.subtasks.map(st => (
-                     <SubtaskRow key={st._id} taskId={task._id} subtask={st} />
+                     <SubtaskRow key={st._id} taskId={task._id} subtask={st} onToast={setToast} />
                    ))}
                 </ul>
               </div>

@@ -33,7 +33,7 @@ export default function Stats() {
     { label: 'Coins',          value: game.coins,              icon: '🪙', from: 'rgba(251,191,36,0.2)',  to: 'rgba(245,158,11,0.2)',  border: 'rgba(251,191,36,0.4)' },
     { label: 'Current Streak', value: `${streak}d`,            icon: '🔥', from: 'rgba(251,113,44,0.2)',  to: 'rgba(239,68,68,0.2)',   border: 'rgba(251,113,44,0.4)' },
     { label: 'Best Streak',    value: `${game.longestStreak}d`,icon: '⚡', from: 'rgba(139,92,246,0.2)',  to: 'rgba(99,102,241,0.2)',  border: 'rgba(139,92,246,0.4)' },
-    { label: 'Tasks Done',     value: game.totalCompleted,     icon: '✅', from: 'rgba(52,211,153,0.2)',  to: 'rgba(16,185,129,0.2)',  border: 'rgba(52,211,153,0.4)' },
+    { label: 'Subtasks Done',  value: game.totalCompleted,     icon: '✅', from: 'rgba(52,211,153,0.2)',  to: 'rgba(16,185,129,0.2)',  border: 'rgba(52,211,153,0.4)' },
   ]
 
   return (

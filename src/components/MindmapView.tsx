@@ -93,16 +93,22 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
   }
 
   function handleArchive() {
-    const result = calcCoins(game)
-    dispatch(applyCoins({
-      baseCoins: result.baseCoins,
-      bonusCoins: result.bonusCoins,
-      streak: result.streak,
-      todayKey: result.todayKey,
-      lastStreakBonus: result.bonusCoins > 0 ? result.streak : game.lastStreakBonus,
-    }))
-    dispatch(archiveTask({ id: task._id, coinsEarned: result.baseCoins + result.bonusCoins }))
-    onToast({ baseCoins: result.baseCoins, bonusCoins: result.bonusCoins, bonusReason: result.bonusReason, key: Date.now() })
+    dispatch(archiveTask({ id: task._id, coinsEarned: 0 }))
+  }
+
+  function handleToggleSubtask(subtaskId: string, currentlyDone: boolean) {
+    if (!currentlyDone) {
+      const result = calcCoins(game)
+      dispatch(applyCoins({
+        baseCoins: result.baseCoins,
+        bonusCoins: result.bonusCoins,
+        streak: result.streak,
+        todayKey: result.todayKey,
+        lastStreakBonus: result.bonusCoins > 0 ? result.streak : game.lastStreakBonus,
+      }))
+      onToast({ baseCoins: result.baseCoins, bonusCoins: result.bonusCoins, bonusReason: result.bonusReason, key: Date.now() })
+    }
+    dispatch(toggleSubtask({ taskId: task._id, subtaskId }))
   }
 
   return (
@@ -200,7 +206,7 @@ function MindmapNode({ task, onToast }: { task: Task; onToast: (t: ToastData) =>
             }`}
           >
             <button
-              onClick={() => dispatch(toggleSubtask({ taskId: task._id, subtaskId: subtask._id }))}
+              onClick={() => handleToggleSubtask(subtask._id, subtask.done)}
               className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
                 subtask.done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-gray-200 hover:border-indigo-400'
               }`}

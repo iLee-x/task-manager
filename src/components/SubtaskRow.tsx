@@ -2,17 +2,22 @@ import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, RootState } from '@/store'
 import { renameSubtask, toggleSubtask, setSubtaskPriority } from '@/store/tasksSlice'
+import { applyCoins } from '@/store/gameSlice'
+import { calcCoins } from '@/lib/gameData'
 import { toggleToday } from '@/store/todaySlice'
 import type { Subtask } from '@/types'
+import type { ToastData } from './CoinToast'
 
 interface Props {
   taskId: string
   subtask: Subtask
+  onToast?: (t: ToastData) => void
 }
 
-export default function SubtaskRow({ taskId, subtask }: Props) {
+export default function SubtaskRow({ taskId, subtask, onToast }: Props) {
   const dispatch = useDispatch<AppDispatch>()
   const todaySubtaskIds = useSelector((s: RootState) => s.today.subtaskIds)
+  const game = useSelector((s: RootState) => s.game)
   const isToday = todaySubtaskIds.includes(subtask._id)
   
   const [editing, setEditing] = useState(false)
@@ -30,7 +35,20 @@ export default function SubtaskRow({ taskId, subtask }: Props) {
   return (
     <li className={`flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/40 transition-colors ${openMenu ? 'subtask-menu-open z-50 relative' : ''}`}>
       <button
-        onClick={() => dispatch(toggleSubtask({ taskId, subtaskId: subtask._id }))}
+        onClick={() => {
+          if (!subtask.done) {
+            const result = calcCoins(game)
+            dispatch(applyCoins({
+              baseCoins: result.baseCoins,
+              bonusCoins: result.bonusCoins,
+              streak: result.streak,
+              todayKey: result.todayKey,
+              lastStreakBonus: result.bonusCoins > 0 ? result.streak : game.lastStreakBonus,
+            }))
+            onToast?.({ baseCoins: result.baseCoins, bonusCoins: result.bonusCoins, bonusReason: result.bonusReason, key: Date.now() })
+          }
+          dispatch(toggleSubtask({ taskId, subtaskId: subtask._id }))
+        }}
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all ${
           subtask.done
             ? 'border-emerald-400 bg-emerald-400 text-white'
