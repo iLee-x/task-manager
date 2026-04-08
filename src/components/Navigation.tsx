@@ -55,6 +55,16 @@ export default function Navigation() {
           >
             Stats & Shop
           </Link>
+          <Link
+            to="/history"
+            className={`rounded-xl px-3 py-1.5 text-sm font-medium transition-all ${
+              pathname === '/history'
+                ? 'bg-indigo-500/15 text-indigo-700 shadow-sm'
+                : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
+            }`}
+          >
+            History
+          </Link>
         </div>
         <div className="ml-auto">
           <Link
