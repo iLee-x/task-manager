@@ -5,6 +5,7 @@ import { renameTask, addSubtask, archiveTask, deleteTask } from '@/store/tasksSl
 import type { Task } from '@/types'
 import type { ToastData } from './CoinToast'
 import SubtaskRow from './SubtaskRow'
+import { useT } from '@/i18n/LanguageContext'
 
 interface Props {
   task: Task
@@ -13,6 +14,7 @@ interface Props {
 
 export default function TaskCard({ task, onToast }: Props) {
   const dispatch = useDispatch<AppDispatch>()
+  const { t } = useT()
 
   const [newSubtask, setNewSubtask] = useState('')
   const [showInput, setShowInput] = useState(false)
@@ -75,7 +77,7 @@ export default function TaskCard({ task, onToast }: Props) {
               <h3
                 className="truncate text-base font-semibold text-gray-800 cursor-pointer hover:text-indigo-600 transition-colors"
                 onClick={() => setEditingTitle(true)}
-                title="Click to edit"
+                title={t.taskCard.clickToEdit}
               >
                 {task.title}
               </h3>
@@ -104,13 +106,13 @@ export default function TaskCard({ task, onToast }: Props) {
               <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              Archive
+              {t.taskCard.archive}
             </button>
           )}
           <button
-            onClick={() => { if (confirm('Delete this task?')) dispatch(deleteTask(task._id)) }}
+            onClick={() => { if (confirm(t.taskCard.deleteConfirm)) dispatch(deleteTask(task._id)) }}
             className="rounded-xl border border-gray-200/60 p-1 text-gray-300 hover:border-red-200 hover:text-red-400 transition-colors bg-white/30"
-            title="Delete task"
+            title={t.taskCard.deleteTitle}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -121,7 +123,7 @@ export default function TaskCard({ task, onToast }: Props) {
 
       <div className="mt-4">
         <div className="flex justify-between text-xs mb-1.5">
-          <span className="text-gray-400">{done}/{total} subtasks</span>
+          <span className="text-gray-400">{t.taskCard.subtasks(done, total)}</span>
           <span className={`font-semibold ${isComplete ? 'text-emerald-500' : 'text-indigo-500'}`}>{progress}%</span>
         </div>
         <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
@@ -151,11 +153,11 @@ export default function TaskCard({ task, onToast }: Props) {
                 if (e.key === 'Enter') handleAddSubtask()
                 if (e.key === 'Escape') { setShowInput(false); setNewSubtask('') }
               }}
-              placeholder="New subtask..."
+              placeholder={t.taskCard.newSubtaskPlaceholder}
               className="flex-1 rounded-xl px-3 py-1.5 text-sm outline-none transition-all"
               style={{ background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.7)', backdropFilter: 'blur(8px)' }}
             />
-            <button onClick={handleAddSubtask} className="rounded-xl px-3 py-1.5 text-sm font-medium text-white transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>Add</button>
+            <button onClick={handleAddSubtask} className="rounded-xl px-3 py-1.5 text-sm font-medium text-white transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>{t.taskCard.add}</button>
             <button onClick={() => { setShowInput(false); setNewSubtask('') }} className="rounded-xl border border-gray-200/60 px-3 py-1.5 text-sm text-gray-500 hover:bg-white/40 bg-white/30">✕</button>
           </div>
         ) : (
@@ -166,7 +168,7 @@ export default function TaskCard({ task, onToast }: Props) {
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Add subtask
+            {t.taskCard.addSubtask}
           </button>
         )}
       </div>

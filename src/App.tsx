@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { store } from './store'
+import { LanguageProvider } from './i18n/LanguageContext'
 import Navigation from './components/Navigation'
 import Home from './pages/Home'
 import Stats from './pages/Stats'
@@ -10,6 +11,7 @@ import History from './pages/History'
 export default function App() {
   return (
     <Provider store={store}>
+      <LanguageProvider>
       <BrowserRouter>
         <div className="relative min-h-screen flex flex-col overflow-x-hidden" style={{ background: '#eef0f8' }}>
           {/* Animated background blobs */}
@@ -28,6 +30,7 @@ export default function App() {
           </div>
         </div>
       </BrowserRouter>
+      </LanguageProvider>
     </Provider>
   )
 }

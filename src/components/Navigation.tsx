@@ -1,11 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
+import { useT } from '@/i18n/LanguageContext'
 
 export default function Navigation() {
   const coins = useSelector((s: RootState) => s.game.coins)
   const todayCount = useSelector((s: RootState) => s.today.subtaskIds.length)
   const { pathname } = useLocation()
+  const { lang, setLang, t } = useT()
 
   return (
     <nav className="glass-nav sticky top-0 z-40">
@@ -22,7 +24,7 @@ export default function Navigation() {
                 : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
             }`}
           >
-            Tasks
+            {t.nav.tasks}
           </Link>
           <Link
             to="/today"
@@ -35,7 +37,7 @@ export default function Navigation() {
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill={pathname === '/today' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
             </svg>
-            Today
+            {t.nav.today}
             {todayCount > 0 && (
               <span
                 className="flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none text-white"
@@ -53,7 +55,7 @@ export default function Navigation() {
                 : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
             }`}
           >
-            Stats & Shop
+            {t.nav.statsShop}
           </Link>
           <Link
             to="/history"
@@ -63,10 +65,19 @@ export default function Navigation() {
                 : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'
             }`}
           >
-            History
+            {t.nav.history}
           </Link>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {/* Language toggle */}
+          <button
+            onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
+            className="rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-all hover:scale-105"
+            style={{ background: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.7)', color: '#6b7280' }}
+            title={lang === 'en' ? '切换为中文' : 'Switch to English'}
+          >
+            {lang === 'en' ? '中文' : 'EN'}
+          </button>
           <Link
             to="/stats"
             className="flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-xs font-semibold transition-all hover:scale-105"

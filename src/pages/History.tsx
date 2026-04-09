@@ -2,6 +2,8 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import type { RootState } from '@/store'
+import { useT } from '@/i18n/LanguageContext'
+import { LOCALE_MAP } from '@/i18n/translations'
 
 type ViewMode = 'day' | 'week' | 'month'
 type ItemType = 'task' | 'subtask'
@@ -30,16 +32,6 @@ function todayStr() {
   return new Date().toLocaleDateString('en-CA')
 }
 
-function dayLabel(dateStr: string) {
-  const yest = new Date()
-  yest.setDate(yest.getDate() - 1)
-  if (dateStr === todayStr()) return 'Today'
-  if (dateStr === yest.toLocaleDateString('en-CA')) return 'Yesterday'
-  return localDate(dateStr).toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-  })
-}
-
 function weekKey(dateStr: string) {
   const d = localDate(dateStr)
   const mon = new Date(d)
@@ -48,21 +40,33 @@ function weekKey(dateStr: string) {
   return mon.toLocaleDateString('en-CA')
 }
 
-function weekLabel(monKey: string) {
-  const mon = localDate(monKey)
-  const sun = new Date(mon)
-  sun.setDate(mon.getDate() + 6)
-  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  return `${fmt(mon)} – ${fmt(sun)}, ${sun.getFullYear()}`
-}
-
 function monthKey(dateStr: string) { return dateStr.slice(0, 7) }
 
-function monthLabel(mk: string) {
-  return localDate(mk + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-}
+function buildGroups(items: HistoryItem[], mode: ViewMode, locale: string, todayLabel: string, yesterdayLabel: string): Group[] {
+  const yest = new Date()
+  yest.setDate(yest.getDate() - 1)
+  const yesterdayStr = yest.toLocaleDateString('en-CA')
 
-function buildGroups(items: HistoryItem[], mode: ViewMode): Group[] {
+  function dayLabel(dateStr: string) {
+    if (dateStr === todayStr()) return todayLabel
+    if (dateStr === yesterdayStr) return yesterdayLabel
+    return localDate(dateStr).toLocaleDateString(locale, {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+    })
+  }
+
+  function weekLabel(monKey: string) {
+    const mon = localDate(monKey)
+    const sun = new Date(mon)
+    sun.setDate(mon.getDate() + 6)
+    const fmt = (d: Date) => d.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+    return `${fmt(mon)} – ${fmt(sun)}, ${sun.getFullYear()}`
+  }
+
+  function monthLabel(mk: string) {
+    return localDate(mk + '-01').toLocaleDateString(locale, { month: 'long', year: 'numeric' })
+  }
+
   const map = new Map<string, HistoryItem[]>()
   for (const item of items) {
     const k =
@@ -83,21 +87,22 @@ function buildGroups(items: HistoryItem[], mode: ViewMode): Group[] {
     }))
 }
 
-const VIEW_MODES: { id: ViewMode; label: string }[] = [
-  { id: 'day',   label: 'Day'   },
-  { id: 'week',  label: 'Week'  },
-  { id: 'month', label: 'Month' },
-]
-
 export default function History() {
   const tasks = useSelector((s: RootState) => s.tasks)
   const [mode, setMode] = useState<ViewMode>('day')
+  const { t, lang } = useT()
+  const locale = LOCALE_MAP[lang]
+
+  const VIEW_MODES: { id: ViewMode; label: string }[] = [
+    { id: 'day',   label: t.history.day   },
+    { id: 'week',  label: t.history.week  },
+    { id: 'month', label: t.history.month },
+  ]
 
   const allItems: HistoryItem[] = useMemo(() => {
     const items: HistoryItem[] = []
 
     for (const task of tasks) {
-      // Archived tasks
       if (task.archived && task.archivedAt) {
         items.push({
           type: 'task',
@@ -108,7 +113,6 @@ export default function History() {
         })
       }
 
-      // Completed subtasks (skip if parent task is also archived on the same day to avoid duplication)
       for (const sub of task.subtasks) {
         if (sub.done && sub.completedAt) {
           items.push({
@@ -125,7 +129,10 @@ export default function History() {
     return items
   }, [tasks])
 
-  const groups = useMemo(() => buildGroups(allItems, mode), [allItems, mode])
+  const groups = useMemo(
+    () => buildGroups(allItems, mode, locale, t.history.todayLabel, t.history.yesterdayLabel),
+    [allItems, mode, locale, t.history.todayLabel, t.history.yesterdayLabel]
+  )
 
   const taskCount = allItems.filter((i) => i.type === 'task').length
   const subtaskCount = allItems.filter((i) => i.type === 'subtask').length
@@ -142,17 +149,17 @@ export default function History() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back to tasks
+          {t.history.backToTasks}
         </Link>
 
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-800">History</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-800">{t.history.title}</h1>
             <p className="mt-1 text-sm text-gray-400">
-              {taskCount} task{taskCount !== 1 ? 's' : ''}
-              {subtaskCount > 0 && ` · ${subtaskCount} subtask${subtaskCount !== 1 ? 's' : ''}`}
-              {totalCoins > 0 && ` · 🪙 ${totalCoins} coins earned`}
+              {t.history.tasks(taskCount)}
+              {subtaskCount > 0 && ` · ${t.history.subtasksCount(subtaskCount)}`}
+              {totalCoins > 0 && ` · 🪙 ${totalCoins} ${t.history.coinsEarned}`}
             </p>
           </div>
 
@@ -189,10 +196,8 @@ export default function History() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-gray-400">No history yet</p>
-            <p className="mt-1 text-xs text-gray-300 max-w-xs">
-              Complete subtasks or archive tasks to start building your history.
-            </p>
+            <p className="text-sm font-semibold text-gray-400">{t.history.noHistory}</p>
+            <p className="mt-1 text-xs text-gray-300 max-w-xs">{t.history.noHistoryHint}</p>
           </div>
         )}
 
@@ -212,7 +217,7 @@ export default function History() {
                 <p className="text-sm font-semibold text-gray-700">{group.label}</p>
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-gray-400">
-                    {group.items.length} item{group.items.length !== 1 ? 's' : ''}
+                    {t.history.items(group.items.length)}
                   </span>
                   {group.totalCoins > 0 && (
                     <span
@@ -254,12 +259,12 @@ export default function History() {
                       <p className="text-sm font-medium text-gray-700 truncate">{item.title}</p>
                       {item.type === 'subtask' && item.parentTitle && (
                         <p className="text-xs text-gray-400 truncate mt-0.5">
-                          in {item.parentTitle}
+                          {t.history.inParent(item.parentTitle)}
                         </p>
                       )}
                       {mode !== 'day' && (
                         <p className="text-xs text-gray-400 mt-0.5">
-                          {localDate(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          {localDate(item.date).toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                       )}
                     </div>
@@ -273,7 +278,7 @@ export default function History() {
                           : { background: 'rgba(99,102,241,0.1)', color: '#4f46e5' }
                       }
                     >
-                      {item.type === 'task' ? 'Task' : 'Subtask'}
+                      {item.type === 'task' ? t.history.taskLabel : t.history.subtaskLabel}
                     </span>
 
                     {/* Coins (tasks only) */}

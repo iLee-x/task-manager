@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import type { AppDispatch } from '@/store'
 import { addTask } from '@/store/tasksSlice'
+import { useT } from '@/i18n/LanguageContext'
 
 interface Props {
   onClose: () => void
@@ -11,12 +12,13 @@ export default function AddTaskModal({ onClose }: Props) {
   const dispatch = useDispatch<AppDispatch>()
   const formRef = useRef<HTMLFormElement>(null)
   const [error, setError] = useState('')
+  const { t } = useT()
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const data = new FormData(e.currentTarget)
     const title = (data.get('title') as string).trim()
-    if (!title) { setError('Title is required'); return }
+    if (!title) { setError(t.addTaskModal.titleRequired); return }
     const description = (data.get('description') as string).trim()
     const subtaskLines = (data.get('subtasks') as string).split('\n').map((s) => s.trim()).filter(Boolean)
     dispatch(addTask({
@@ -44,7 +46,7 @@ export default function AddTaskModal({ onClose }: Props) {
         {/* Header */}
         <div className="px-6 py-5" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.85), rgba(139,92,246,0.85))', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white">New Task</h2>
+            <h2 className="text-lg font-bold text-white">{t.addTaskModal.title}</h2>
             <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -56,13 +58,13 @@ export default function AddTaskModal({ onClose }: Props) {
         <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Title <span className="text-red-400">*</span>
+              {t.addTaskModal.titleLabel} <span className="text-red-400">*</span>
             </label>
             <input
               name="title"
               type="text"
               autoFocus
-              placeholder="What needs to be done?"
+              placeholder={t.addTaskModal.titlePlaceholder}
               onChange={() => setError('')}
               style={inputStyle}
               className={`w-full rounded-xl px-4 py-2.5 text-sm text-gray-900 transition-all ${inputFocusClass}`}
@@ -71,11 +73,11 @@ export default function AddTaskModal({ onClose }: Props) {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">Description</label>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">{t.addTaskModal.descriptionLabel}</label>
             <textarea
               name="description"
               rows={2}
-              placeholder="Optional notes..."
+              placeholder={t.addTaskModal.descriptionPlaceholder}
               style={inputStyle}
               className={`w-full rounded-xl px-4 py-2.5 text-sm text-gray-900 transition-all resize-none ${inputFocusClass}`}
             />
@@ -83,12 +85,12 @@ export default function AddTaskModal({ onClose }: Props) {
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-400">
-              Subtasks <span className="normal-case font-normal text-gray-300">(one per line)</span>
+              {t.addTaskModal.subtasksLabel} <span className="normal-case font-normal text-gray-300">{t.addTaskModal.subtasksHint}</span>
             </label>
             <textarea
               name="subtasks"
               rows={4}
-              placeholder={'Design mockup\nWrite the API\nDeploy to production'}
+              placeholder={t.addTaskModal.subtasksPlaceholder}
               style={inputStyle}
               className={`w-full rounded-xl px-4 py-2.5 text-sm text-gray-900 transition-all resize-none font-mono ${inputFocusClass}`}
             />
@@ -101,14 +103,14 @@ export default function AddTaskModal({ onClose }: Props) {
               className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-gray-500 transition-all hover:bg-white/50"
               style={{ background: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.65)' }}
             >
-              Cancel
+              {t.addTaskModal.cancel}
             </button>
             <button
               type="submit"
               className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', boxShadow: '0 4px 16px rgba(99,102,241,0.35)' }}
             >
-              Create Task
+              {t.addTaskModal.createTask}
             </button>
           </div>
         </form>

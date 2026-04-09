@@ -7,6 +7,8 @@ import { BADGES } from '@/lib/badges'
 import Heatmap from '@/components/Heatmap'
 import Badge3D from '@/components/Badge3D'
 import CountryMap from '@/components/CountryMap'
+import { useT } from '@/i18n/LanguageContext'
+import { LOCALE_MAP } from '@/i18n/translations'
 
 export default function Stats() {
   const game = useSelector((s: RootState) => s.game)
@@ -14,13 +16,14 @@ export default function Stats() {
   const dispatch = useDispatch<AppDispatch>()
   const [buyMsg, setBuyMsg] = useState('')
   const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
+  const { t, lang } = useT()
 
   const streak = game.currentStreak
 
   function handleBuy(id: string, price: number) {
     if (game.badges.includes(id)) return
     if (game.coins < price) {
-      setBuyMsg('Not enough coins!')
+      setBuyMsg(t.stats.notEnoughCoins)
       setTimeout(() => setBuyMsg(''), 2000)
       return
     }
@@ -30,10 +33,10 @@ export default function Stats() {
   const previewBadge = BADGES.find((b) => b.id === selectedBadge) ?? null
 
   const statCards = [
-    { label: 'Coins',          value: game.coins,              icon: '🪙', from: 'rgba(251,191,36,0.2)',  to: 'rgba(245,158,11,0.2)',  border: 'rgba(251,191,36,0.4)' },
-    { label: 'Current Streak', value: `${streak}d`,            icon: '🔥', from: 'rgba(251,113,44,0.2)',  to: 'rgba(239,68,68,0.2)',   border: 'rgba(251,113,44,0.4)' },
-    { label: 'Best Streak',    value: `${game.longestStreak}d`,icon: '⚡', from: 'rgba(139,92,246,0.2)',  to: 'rgba(99,102,241,0.2)',  border: 'rgba(139,92,246,0.4)' },
-    { label: 'Subtasks Done',  value: game.totalCompleted,     icon: '✅', from: 'rgba(52,211,153,0.2)',  to: 'rgba(16,185,129,0.2)',  border: 'rgba(52,211,153,0.4)' },
+    { label: t.stats.coins,         value: game.coins,              icon: '🪙', from: 'rgba(251,191,36,0.2)',  to: 'rgba(245,158,11,0.2)',  border: 'rgba(251,191,36,0.4)' },
+    { label: t.stats.currentStreak, value: `${streak}d`,            icon: '🔥', from: 'rgba(251,113,44,0.2)',  to: 'rgba(239,68,68,0.2)',   border: 'rgba(251,113,44,0.4)' },
+    { label: t.stats.bestStreak,    value: `${game.longestStreak}d`,icon: '⚡', from: 'rgba(139,92,246,0.2)',  to: 'rgba(99,102,241,0.2)',  border: 'rgba(139,92,246,0.4)' },
+    { label: t.stats.subtasksDone,  value: game.totalCompleted,     icon: '✅', from: 'rgba(52,211,153,0.2)',  to: 'rgba(16,185,129,0.2)',  border: 'rgba(52,211,153,0.4)' },
   ]
 
   return (
@@ -44,10 +47,10 @@ export default function Stats() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
-          Back to tasks
+          {t.stats.backToTasks}
         </Link>
 
-        <h1 className="text-3xl font-bold tracking-tight text-gray-800">Stats & Achievements</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-gray-800">{t.stats.title}</h1>
 
         {/* Stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -66,13 +69,13 @@ export default function Stats() {
 
         {/* Streak bonuses */}
         <div className="glass-panel rounded-2xl p-6">
-          <h2 className="text-base font-semibold text-gray-700 mb-1">Streak Bonuses</h2>
-          <p className="text-xs text-gray-400 mb-4">Archive tasks daily to build your streak and earn bonus coins.</p>
+          <h2 className="text-base font-semibold text-gray-700 mb-1">{t.stats.streakBonuses}</h2>
+          <p className="text-xs text-gray-400 mb-4">{t.stats.streakBonusesHint}</p>
           <div className="flex flex-col sm:flex-row gap-3">
             {[
-              { label: '🔥 3-Day Streak',  desc: '+5 to +10 bonus coins',  threshold: 3  },
-              { label: '🔥 7-Day Streak',  desc: '+20 to +30 bonus coins', threshold: 7  },
-              { label: '🔥 14-Day Streak', desc: '+20 to +30 bonus coins', threshold: 14 },
+              { label: t.stats.streak3,  desc: t.stats.bonus5to10,  threshold: 3  },
+              { label: t.stats.streak7,  desc: t.stats.bonus20to30, threshold: 7  },
+              { label: t.stats.streak14, desc: t.stats.bonus20to30, threshold: 14 },
             ].map(({ label, desc, threshold }) => (
               <div
                 key={threshold}
@@ -92,27 +95,27 @@ export default function Stats() {
 
         {/* Activity heatmap */}
         <div className="glass-panel rounded-2xl p-6">
-          <h2 className="text-base font-semibold text-gray-700 mb-4">Activity</h2>
+          <h2 className="text-base font-semibold text-gray-700 mb-4">{t.stats.activity}</h2>
           <Heatmap activityLog={game.activityLog} tasks={tasks} />
         </div>
 
         {/* Completion history */}
         {(() => {
           const history = tasks
-            .filter((t) => t.archived && t.archivedAt)
+            .filter((tk) => tk.archived && tk.archivedAt)
             .slice()
             .sort((a, b) => (b.archivedAt! > a.archivedAt! ? 1 : -1))
           if (history.length === 0) return null
           return (
             <div className="glass-panel rounded-2xl p-6">
-              <h2 className="text-base font-semibold text-gray-700 mb-1">Completion History</h2>
-              <p className="text-xs text-gray-400 mb-4">{history.length} task{history.length !== 1 ? 's' : ''} completed in total</p>
+              <h2 className="text-base font-semibold text-gray-700 mb-1">{t.stats.completionHistory}</h2>
+              <p className="text-xs text-gray-400 mb-4">{t.stats.tasksCompletedTotal(history.length)}</p>
               <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-                {history.map((t) => {
-                  const label = new Date(t.archivedAt! + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                {history.map((tk) => {
+                  const label = new Date(tk.archivedAt! + 'T12:00:00').toLocaleDateString(LOCALE_MAP[lang], { month: 'short', day: 'numeric', year: 'numeric' })
                   return (
                     <div
-                      key={t._id}
+                      key={tk._id}
                       className="flex items-center gap-3 rounded-xl px-4 py-2.5"
                       style={{ background: 'rgba(255,255,255,0.45)', border: '1px solid rgba(255,255,255,0.7)' }}
                     >
@@ -122,14 +125,14 @@ export default function Stats() {
                       >
                         ✓
                       </div>
-                      <span className="flex-1 text-sm font-medium text-gray-700 truncate">{t.title}</span>
+                      <span className="flex-1 text-sm font-medium text-gray-700 truncate">{tk.title}</span>
                       <span className="shrink-0 text-xs text-gray-400">{label}</span>
-                      {t.coinsEarned != null && (
+                      {tk.coinsEarned != null && (
                         <span
                           className="shrink-0 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
                           style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)', color: '#b45309' }}
                         >
-                          🪙 {t.coinsEarned}
+                          🪙 {tk.coinsEarned}
                         </span>
                       )}
                     </div>
@@ -142,10 +145,8 @@ export default function Stats() {
 
         {/* World Map */}
         <div className="glass-panel rounded-2xl p-6">
-          <h2 className="text-base font-semibold text-gray-700 mb-1">World Map</h2>
-          <p className="text-xs text-gray-400 mb-5">
-            Gold countries = badges you own. Hover to explore famous cities.
-          </p>
+          <h2 className="text-base font-semibold text-gray-700 mb-1">{t.stats.worldMap}</h2>
+          <p className="text-xs text-gray-400 mb-5">{t.stats.worldMapHint}</p>
           <CountryMap ownedBadges={game.badges} />
         </div>
 
@@ -153,10 +154,10 @@ export default function Stats() {
         {game.badges.length > 0 && (
           <div className="glass-panel rounded-2xl p-6">
             <h2 className="text-base font-semibold text-gray-700 mb-1">
-              My Badges
-              <span className="ml-2 text-xs font-normal text-gray-400">{game.badges.length} collected</span>
+              {t.stats.myBadges}
+              <span className="ml-2 text-xs font-normal text-gray-400">{t.stats.collected(game.badges.length)}</span>
             </h2>
-            <p className="text-xs text-gray-400 mb-6">Hover to pause rotation. Click to preview enlarged.</p>
+            <p className="text-xs text-gray-400 mb-6">{t.stats.badgesHint}</p>
             <div className="flex flex-wrap gap-8 justify-center sm:justify-start">
               {BADGES.filter((b) => game.badges.includes(b.id)).map((badge) => (
                 <div
@@ -193,7 +194,7 @@ export default function Stats() {
                 className="mt-2 rounded-xl px-5 py-2 text-sm font-medium text-gray-500 transition-all hover:bg-white/50"
                 style={{ background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.7)' }}
               >
-                Close
+                {t.stats.close}
               </button>
             </div>
           </div>
@@ -202,15 +203,15 @@ export default function Stats() {
         {/* Badge shop */}
         <div className="glass-panel rounded-2xl p-6">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-base font-semibold text-gray-700">Badge Shop</h2>
+            <h2 className="text-base font-semibold text-gray-700">{t.stats.badgeShop}</h2>
             <span
               className="flex items-center gap-1.5 rounded-2xl px-3 py-1.5 text-sm font-semibold"
               style={{ background: 'rgba(251,191,36,0.18)', border: '1px solid rgba(251,191,36,0.35)', color: '#b45309' }}
             >
-              🪙 {game.coins} coins
+              🪙 {game.coins} {t.stats.coinsSuffix}
             </span>
           </div>
-          <p className="text-xs text-gray-400 mb-6">Earn coins by archiving tasks. Badges feature 3D rotation — front shows the landmark, back shows details.</p>
+          <p className="text-xs text-gray-400 mb-6">{t.stats.badgeShopHint}</p>
 
           {buyMsg && (
             <div
@@ -237,7 +238,7 @@ export default function Stats() {
                       className="rounded-lg px-3 py-1 text-xs font-semibold"
                       style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', color: '#059669' }}
                     >
-                      Owned ✓
+                      {t.stats.owned}
                     </span>
                   ) : (
                     <button

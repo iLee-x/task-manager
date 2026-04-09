@@ -8,6 +8,7 @@ import AddTaskModal from './AddTaskModal'
 import ArchivedSection from './ArchivedSection'
 import CoinToast from './CoinToast'
 import type { ToastData } from './CoinToast'
+import { useT } from '@/i18n/LanguageContext'
 
 type View = 'list' | 'mindmap'
 
@@ -19,6 +20,7 @@ export default function TaskBoard() {
     return (localStorage.getItem('task-manager-view') as View) || 'list'
   })
   const [toast, setToast] = useState<ToastData | null>(null)
+  const { t } = useT()
 
   useEffect(() => {
     localStorage.setItem('task-manager-view', view)
@@ -37,9 +39,9 @@ export default function TaskBoard() {
       <div className="mb-8">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-800">My Tasks</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-gray-800">{t.taskBoard.title}</h1>
             <p className="mt-1 text-sm text-gray-400">
-              {totalSubtasks === 0 ? 'No subtasks yet' : `${doneSubtasks} of ${totalSubtasks} subtasks complete`}
+              {totalSubtasks === 0 ? t.taskBoard.noSubtasksYet : t.taskBoard.subtasksComplete(doneSubtasks, totalSubtasks)}
             </p>
           </div>
 
@@ -61,7 +63,7 @@ export default function TaskBoard() {
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
                 </svg>
-                List
+                {t.taskBoard.list}
               </button>
               <button
                 onClick={() => setView('mindmap')}
@@ -72,7 +74,7 @@ export default function TaskBoard() {
                   <circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="19" cy="18" r="2"/>
                   <path strokeLinecap="round" d="M7 12h4m2-6h2m-2 6h2m-2 6h2M11 12c0-3 2-5 4-5.5M11 12c0 3 2 5 4 5.5"/>
                 </svg>
-                Map
+                {t.taskBoard.map}
               </button>
             </div>
 
@@ -84,7 +86,7 @@ export default function TaskBoard() {
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
               </svg>
-              New Task
+              {t.taskBoard.newTask}
             </button>
           </div>
         </div>
@@ -93,7 +95,7 @@ export default function TaskBoard() {
           <div className="glass-panel mt-5 rounded-2xl p-4 flex items-center gap-4">
             <div className="flex-1">
               <div className="flex justify-between text-xs mb-1.5">
-                <span className="text-gray-400">Overall progress</span>
+                <span className="text-gray-400">{t.taskBoard.overallProgress}</span>
                 <span className="font-semibold text-indigo-600">{overallProgress}%</span>
               </div>
               <div className="h-2.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
@@ -105,7 +107,7 @@ export default function TaskBoard() {
             </div>
             <div className="shrink-0 text-right">
               <p className="text-2xl font-bold text-gray-800">{doneSubtasks}<span className="text-sm font-normal text-gray-400">/{totalSubtasks}</span></p>
-              <p className="text-xs text-gray-400">subtasks done</p>
+              <p className="text-xs text-gray-400">{t.taskBoard.subtasksDone}</p>
             </div>
           </div>
         )}
@@ -118,8 +120,8 @@ export default function TaskBoard() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
           </div>
-          <p className="text-sm font-semibold text-gray-400">No tasks yet</p>
-          <p className="mt-1 text-xs text-gray-300">Hit &ldquo;New Task&rdquo; to get started</p>
+          <p className="text-sm font-semibold text-gray-400">{t.taskBoard.noTasksYet}</p>
+          <p className="mt-1 text-xs text-gray-300">{t.taskBoard.getStarted}</p>
         </div>
       ) : view === 'list' ? (
         <div className="space-y-3">

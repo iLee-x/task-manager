@@ -6,30 +6,32 @@ import SubtaskRow from '@/components/SubtaskRow'
 import CoinToast from '@/components/CoinToast'
 import type { ToastData } from '@/components/CoinToast'
 import { useState } from 'react'
-import type { Task, Subtask } from '@/types'
+import { useT } from '@/i18n/LanguageContext'
+import { LOCALE_MAP } from '@/i18n/translations'
 
 export default function Today() {
   const tasks = useSelector((s: RootState) => s.tasks)
   const todaySubtaskIds = useSelector((s: RootState) => s.today.subtaskIds)
   const dispatch = useDispatch<AppDispatch>()
   const [toast, setToast] = useState<ToastData | null>(null)
+  const { t, lang } = useT()
 
   // Group subtasks by task
   const tasksWithTodaySubtasks = tasks
-    .filter(t => !t.archived)
-    .map(t => ({
-      ...t,
-      subtasks: t.subtasks.filter(st => todaySubtaskIds.includes(st._id))
+    .filter(tk => !tk.archived)
+    .map(tk => ({
+      ...tk,
+      subtasks: tk.subtasks.filter(st => todaySubtaskIds.includes(st._id))
     }))
-    .filter(t => t.subtasks.length > 0)
+    .filter(tk => tk.subtasks.length > 0)
 
-  const flatTodaySubtasks = tasksWithTodaySubtasks.flatMap(t => t.subtasks)
+  const flatTodaySubtasks = tasksWithTodaySubtasks.flatMap(tk => tk.subtasks)
   const totalSubtasks = flatTodaySubtasks.length
   const doneSubtasks = flatTodaySubtasks.filter((st) => st.done).length
   const progress = totalSubtasks === 0 ? 0 : Math.round((doneSubtasks / totalSubtasks) * 100)
 
   const now = new Date()
-  const formattedDate = now.toLocaleDateString('en-US', {
+  const formattedDate = now.toLocaleDateString(LOCALE_MAP[lang], {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -37,18 +39,18 @@ export default function Today() {
 
   function getGreeting() {
     const hour = now.getHours()
-    if (hour < 12) return 'Good morning'
-    if (hour < 17) return 'Good afternoon'
-    return 'Good evening'
+    if (hour < 12) return t.today.greetMorning
+    if (hour < 17) return t.today.greetAfternoon
+    return t.today.greetEvening
   }
 
   function getMotivation() {
-    if (totalSubtasks === 0) return "Add some priority subtasks to your focus for today!"
-    if (progress === 100) return "🎉 All focused tasks complete! You're amazing!"
-    if (progress >= 75) return "Almost there! Keep pushing! 💪"
-    if (progress >= 50) return "Halfway done — great momentum! 🚀"
-    if (progress > 0) return "Great start! Keep the flow going ✨"
-    return "Let's make today count! ⚡"
+    if (totalSubtasks === 0) return t.today.motivEmpty
+    if (progress === 100) return t.today.motivDone
+    if (progress >= 75) return t.today.motivAlmost
+    if (progress >= 50) return t.today.motivHalf
+    if (progress > 0) return t.today.motivStarted
+    return t.today.motivBegin
   }
 
   return (
@@ -59,7 +61,7 @@ export default function Today() {
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/>
           </svg>
-          Back to all tasks
+          {t.today.backToTasks}
         </Link>
 
         <div className="mb-8">
@@ -81,7 +83,7 @@ export default function Today() {
                 <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
-                Clear all
+                {t.today.clearAll}
               </button>
             )}
           </div>
@@ -90,7 +92,7 @@ export default function Today() {
             <div className="glass-panel mt-5 rounded-2xl p-4 flex items-center gap-4">
               <div className="flex-1">
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-gray-400">Today's progress</span>
+                  <span className="text-gray-400">{t.today.todaysProgress}</span>
                   <span className={`font-semibold ${progress === 100 ? 'text-emerald-500' : 'text-indigo-600'}`}>{progress}%</span>
                 </div>
                 <div className="h-2.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.06)' }}>
@@ -109,7 +111,7 @@ export default function Today() {
                 <p className="text-2xl font-bold text-gray-800">
                   {doneSubtasks}<span className="text-sm font-normal text-gray-400">/{totalSubtasks}</span>
                 </p>
-                <p className="text-xs text-gray-400">subtasks done</p>
+                <p className="text-xs text-gray-400">{t.today.subtasksDone}</p>
               </div>
             </div>
           )}
@@ -123,14 +125,14 @@ export default function Today() {
                 <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
-                {totalSubtasks} subtask{totalSubtasks !== 1 ? 's' : ''} for today
+                {t.today.subtasksForToday(totalSubtasks)}
               </span>
               {progress === 100 && (
                 <span
                   className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold"
                   style={{ background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', color: '#059669' }}
                 >
-                  ✓ All complete!
+                  ✓ {t.today.allComplete}
                 </span>
               )}
             </div>
@@ -144,9 +146,9 @@ export default function Today() {
                 <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-gray-400">No subtasks selected for today</p>
+            <p className="text-sm font-semibold text-gray-400">{t.today.noSubtasks}</p>
             <p className="mt-1 text-xs text-gray-300 max-w-xs">
-              Go to your task list and tap the ... menu on any subtask to add it to today's focus
+              {t.today.noSubtasksHint}
             </p>
             <Link
               to="/"
@@ -156,7 +158,7 @@ export default function Today() {
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
               </svg>
-              Browse tasks
+              {t.today.browseTasks}
             </Link>
           </div>
         ) : (
